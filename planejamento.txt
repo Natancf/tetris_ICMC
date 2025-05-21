@@ -1,0 +1,29 @@
+inicializacao e declaracao de variaveis
+	- posicao da peca *
+	- posicao anterior da peca *
+	- vetor de aleatoriedade (ordem das pecas)
+	- rotacao da peca I *
+	- vetor de quadrados ocupados 
+	- tipo da peca *
+	- mapa *
+ 
+main
+	- desenha menu
+	- desenha mapa *
+	- inicializa peca (spawn inicial)
+	main_loop
+		- move peca *?
+		- fixa peca 
+		- elimina linha
+
+funcoes-------------------------------------------------------------------------------------------------
+
+move peca
+	- recalcula pos *
+		- verifica se esta nas bordas *
+	- desenha peca *
+	- apaga peca *
+fixa peca
+	?
+elimina linha
+	?
