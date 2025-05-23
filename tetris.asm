@@ -202,6 +202,7 @@ spawn_peca:
 	push FR
 	push r0
 	push r1
+	push r2
 
 	;verificar flag_spawn
 	load r0, flag_spawn
@@ -209,9 +210,13 @@ spawn_peca:
 	cmp r0, r1
 	jeq end_spawn_peca ;caso seja 0, nao fazer nada
 
+	;definicao da posicao inicial da peca
+	loadn r2, #259
+	store pos, r2
+
 	;verificar se e possivel spawn
 	load r0, t_peca
-	
+
 		;Caso L--------------------------
 			loadn r1, #0
 			cmp r0, r1
@@ -224,7 +229,7 @@ spawn_peca:
 			loadn r1, #4
 			cmp r0, r1
 			jne spawn_I
-
+		
 			jmp end_spawn_peca
 		;--------------------------------
 
@@ -232,7 +237,7 @@ spawn_peca:
 			loadn r1, #8
 			cmp r0, r1
 			jne spawn_quadrado
-
+		
 			jmp end_spawn_peca
 		;--------------------------------
 
@@ -261,11 +266,11 @@ spawn_peca:
 		;--------------------------------
 
 		spawn_Z: ;Caso Z-----------------
-
 			jmp end_spawn_peca
 		;--------------------------------
 
 	end_spawn_peca:
+	pop r2
 	pop r1	
 	pop r0
 	pop FR
