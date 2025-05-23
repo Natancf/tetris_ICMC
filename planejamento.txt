@@ -1,14 +1,14 @@
 Inicializacao
-- flag_spawn <- 1 //flag_spawn, caso 1, spawna peca
+- flag_spawn <- 1 //flag_spawn, caso 1, spawna peca --- PRONTO
 
 main
-- imprime mensagem inicial
-- wait_start
+- imprime mensagem inicial --- PRONTO
+- wait_start --- PRONTO
 	- var count
 		-> inc count -> reset a cada 499
 			-> condicao de stop : enter
 	- wait enter
-- inicia jogo
+- inicia jogo --- PRONTO
 	-> index inicial do vetor randomico <- count
 	-> t_peca <- rand[index inicial]
 - spawn peca

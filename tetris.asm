@@ -30,25 +30,18 @@ msg_inicial : string "     Pressione ESPACO para INICIAR!     "
 apaga_msg   : string "                                        "
 
 main:
+	;Impressao da mensagem inicial
 	loadn r0, #560
 	loadn r1, #msg_inicial
 	call print_string
 	
 	call wait_start
 
+	;Apaga mensagem inicial
 	loadn r1, #apaga_msg
 	call print_string
 
 	halt
-
-
-;--------------------------------------------------
-;print_msg_incial
-;--------------------------------------------------
-
-;--------------------------------------------------
-;END print_msg_inicial
-;--------------------------------------------------
 
 ;--------------------------------------------------
 ;print_string
@@ -78,13 +71,13 @@ print_string:
 		
 
 	end_print_string:
-	pop r4
-	pop r3
-	pop r2
-	pop r1
-	pop r0
-	pop FR
-	rts
+		pop r4
+		pop r3
+		pop r2
+		pop r1
+		pop r0
+		pop FR
+		rts
 
 ;--------------------------------------------------
 ;END print_string
@@ -127,6 +120,33 @@ wait_start:
 ;--------------------------------------------------
 ;END wait_start
 ;--------------------------------------------------
+
+;--------------------------------------------------
+;start_game
+;-------------------------------------------------
+;inicializa o tipo de peca 
+start_game:
+	push FR
+	push r0 ;rand_index
+	push r1
+	push r2
+
+	load r0, rand_index
+	loadn r1, #rand
+	add r1, r1, r0 ;r1 aponta para rand[r0]
+	loadi r2, r1
+	store t_peca, r2
+
+	pop r2
+	pop r1
+	pop r0
+	pop FR
+	rts
+	
+;--------------------------------------------------
+;END start_game
+;--------------------------------------------------
+
 
 ;mapa
 mapa0  : string "                                        "

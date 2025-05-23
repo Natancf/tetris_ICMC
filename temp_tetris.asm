@@ -54,6 +54,9 @@ static t_peca, #4 ;peca inicial
 ;	8-9 I
 ;	10 quad
 ;	11-14 T
+;
+
+
 
 static atual_rot_I + #0, #0
 
