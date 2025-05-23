@@ -13,7 +13,7 @@ rand_index : var #1
 
 
 main:
-	loadn r0, #499 ;contador para pegar indice aleatorio
+	loadn r0, #699 ;contador para pegar indice aleatorio
 	loadn r1, #' ' ;para verificar se o jogador iniciou o jogo
 	
 	call wait_start
@@ -44,7 +44,7 @@ wait_start:
 		jmp loop_count
 
 	reset_count:
-		loadn r0, #499
+		loadn r0, #699
 		jmp loop_count
 
 	end_wait_start:
@@ -90,7 +90,7 @@ mapa27 : string "                                        "
 mapa28 : string "                                        "
 mapa29 : string "                                        "
 
-
+;vetor randomico
 
 
 
