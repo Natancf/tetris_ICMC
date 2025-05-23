@@ -2,10 +2,11 @@ Inicializacao
 - flag_spawn <- 1 //flag_spawn, caso 1, spawna peca
 
 main
-- var count
-	-> inc count -> reset a cada 499
-		-> condicao de stop : enter
-- wait enter
+- wait_start
+	- var count
+		-> inc count -> reset a cada 499
+			-> condicao de stop : enter
+	- wait enter
 - inicia jogo
 	-> index inicial do vetor randomico <- count
 	-> t_peca <- rand[index inicial]
