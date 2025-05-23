@@ -1,6 +1,6 @@
 jmp main
 
-;posicoes
+;posicoes-------------------------------------------------------------
 pos            : var #1
 pos_ant        : var #1
 pos_calc_quads : var #1 ;parametro da funcao calc_quads
@@ -8,7 +8,7 @@ pos_calc_quads : var #1 ;parametro da funcao calc_quads
 quads : var #4 ;o primeiro elemento do vetor esta inutilizado, mas manter, pois caso contrario
 ;calc_quads nao funciona
 
-;tipo de peca e rotacao atual
+;tipo de peca e rotacao atual-----------------------------------------
 t_peca : var #1
 ; 0-3 L
 ; 4-7 Linv
@@ -18,17 +18,77 @@ t_peca : var #1
 ; 15-18 Z
 ; 19-22 S
 
-;se 1, spawn
+;se 1, spawn---------------------------------------------------------
 flag_spawn : var #1
 static flag_spawn, #1 ;inicializacao
 
-;indice randomico
+;indice randomico-----------------------------------------------------
 rand_index : var #1
 
+;mensagem inicial----------------------------------------------------
+msg_inicial : string "     Pressione ESPACO para INICIAR!     "                                        
+apaga_msg   : string "                                        "
+
 main:
+	loadn r0, #560
+	loadn r1, #msg_inicial
+	call print_string
+	
 	call wait_start
 
+	loadn r1, #apaga_msg
+	call print_string
+
 	halt
+
+
+;--------------------------------------------------
+;print_msg_incial
+;--------------------------------------------------
+
+;--------------------------------------------------
+;END print_msg_inicial
+;--------------------------------------------------
+
+;--------------------------------------------------
+;print_string
+;--------------------------------------------------
+;parametros
+;	r0 : posicao inicial da linha (0, 40, 80, 120, 160...)
+;	r1 : endereco inicial da string
+print_string:
+	push FR
+	push r0 ;posicao inicial da linha
+	push r1 ;endereco incial da string
+	push r2 ;40
+	push r3 ;\0
+	push r4 ;char
+
+	loadn r2, #40
+	loadn r3, #'\0'
+
+	loop_print_string:
+		loadi r4, r1 ;carrega cada char da string em r4
+		cmp r4, r3 ;verifica se chegou no final da string
+		jeq end_print_string
+		outchar r4, r0
+		inc r1 ;ir ao proximo char
+		inc r0 ;ir a proxima posicao
+		jmp loop_print_string
+		
+
+	end_print_string:
+	pop r4
+	pop r3
+	pop r2
+	pop r1
+	pop r0
+	pop FR
+	rts
+
+;--------------------------------------------------
+;END print_string
+;--------------------------------------------------
 
 ;--------------------------------------------------
 ;wait_start

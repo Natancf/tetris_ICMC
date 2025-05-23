@@ -2,6 +2,7 @@ Inicializacao
 - flag_spawn <- 1 //flag_spawn, caso 1, spawna peca
 
 main
+- imprime mensagem inicial
 - wait_start
 	- var count
 		-> inc count -> reset a cada 499
