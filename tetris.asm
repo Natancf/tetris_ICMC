@@ -29,6 +29,9 @@ rand_index : var #1
 msg_inicial : string "     Pressione ESPACO para INICIAR!     "                                        
 apaga_msg   : string "                                        "
 
+;se perdeu
+flag_perdeu : var #1
+
 main:
 	;Impressao da mensagem inicial
 	loadn r0, #560
@@ -42,6 +45,8 @@ main:
 	call print_string
 
 	call start_game
+
+	call spawn_peca
 
 	halt
 
@@ -69,8 +74,7 @@ print_string:
 		outchar r4, r0
 		inc r1 ;ir ao proximo char
 		inc r0 ;ir a proxima posicao
-		jmp loop_print_string
-		
+		jmp loop_print_string		
 
 	end_print_string:
 		pop r4
@@ -203,6 +207,7 @@ spawn_peca:
 	push r0
 	push r1
 	push r2
+	push r3
 
 	;verificar flag_spawn
 	load r0, flag_spawn
@@ -221,6 +226,43 @@ spawn_peca:
 			loadn r1, #0
 			cmp r0, r1
 			jne spawn_Linv
+
+			;verificar se e possivel spawn
+				;Forma da peca no spawn
+				;	    3
+				;	1 p 2
+				;p: posicao
+				; 1, 2, 3: indices de quads
+				;verificar se as posicoes: 258, 259, 260 e 220 estao ocupadas
+				
+				loadn r1, #cp_mapa0
+				loadn r3, #'#'	
+			
+				;verificar se 220 esta' ocupado
+				loadn r2, #220
+				add r2, r1, r2 ;r2 aponta para mapa[220]					
+				loadi r2, r2 ;r2 armazena mapa[220]
+				cmp r2, r3 ;verificar se 220 esta ocupado
+				jeq game_over ;caso esteja
+
+				;verificar se 258 esta ocupado
+				loadn r2, #258
+				add r1, r1, r2 ;r1 aponta para mapa[258]
+				loadi r2, r1 ;r2 armazena mapa[258]
+				cmp r2, r3 ;verificar se 258 esta ocupado
+				jeq game_over ;caso esteja
+			
+				;verificar se 259 esta ocupado
+				inc r1 ;r1 aponta para mapa[259]
+				loadi r2, r1 ;r2 armazena mapa[259]
+				cmp r2, r3 ;verificar se 259 esta ocupado
+				jeq game_over ;caso esteja
+				
+				;verificar se 260 esta ocupado
+				inc r1 ;r1 aponta para mapa[260]
+				loadi r2, r1 ;r2 armazena mapa[260]
+				cmp r2, r3 ;verificar se 260 esta ocupado
+				jeq game_over ;caso esteja
 
 			jmp end_spawn_peca
 		;--------------------------------
@@ -269,7 +311,13 @@ spawn_peca:
 			jmp end_spawn_peca
 		;--------------------------------
 
+	game_over:
+		loadn r1, #1
+		store flag_perdeu, r1
+		jmp end_spawn_peca
+
 	end_spawn_peca:
+	pop r3
 	pop r2
 	pop r1	
 	pop r0
@@ -313,38 +361,40 @@ mapa27 : string "                                        "
 mapa28 : string "                                        "
 mapa29 : string "                                        "
 
-;copia de mapa
-cp_mapa0  : string "                                        "
-cp_mapa1  : string "                                        "
-cp_mapa2  : string "                                        "
-cp_mapa3  : string "                                        "
-cp_mapa4  : string "                                        "
-cp_mapa5  : string "               $$$$$$$$$$               "
-cp_mapa6  : string "               $$$$$$$$$$               "
-cp_mapa7  : string "               $$$$$$$$$$               "
-cp_mapa8  : string "               $$$$$$$$$$               "
-cp_mapa9  : string "               $$$$$$$$$$               "
-cp_mapa10 : string "               $$$$$$$$$$               "
-cp_mapa11 : string "               $$$$$$$$$$               "
-cp_mapa12 : string "               $$$$$$$$$$               "
-cp_mapa13 : string "               $$$$$$$$$$               "
-cp_mapa14 : string "               $$$$$$$$$$               "
-cp_mapa15 : string "               $$$$$$$$$$               "
-cp_mapa16 : string "               $$$$$$$$$$               "
-cp_mapa17 : string "               $$$$$$$$$$               "
-cp_mapa18 : string "               $$$$$$$$$$               "
-cp_mapa19 : string "               $$$$$$$$$$               "
-cp_mapa20 : string "               $$$$$$$$$$               "
-cp_mapa21 : string "               $$$$$$$$$$               "
-cp_mapa22 : string "               $$$$$$$$$$               "
-cp_mapa23 : string "               $$$$$$$$$$               "
-cp_mapa24 : string "               $$$$$$$$$$               "
-cp_mapa25 : string "                                        "
-cp_mapa26 : string "                                        "
-cp_mapa27 : string "                                        "
-cp_mapa28 : string "                                        "
-cp_mapa29 : string "                                        "
-
+;copia do mapa
+cp_mapa0  : string "                                       "
+cp_mapa1  : string "                                       "
+cp_mapa2  : string "                                       "
+cp_mapa3  : string "                                       "
+cp_mapa4  : string "                                       "
+cp_mapa5  : string "               $$$$$$$$$$              "
+cp_mapa6  : string "               $$$$$$$$$$              "
+cp_mapa7  : string "               $$$$$$$$$$              "
+cp_mapa8  : string "               $$$$$$$$$$              "
+cp_mapa9  : string "               $$$$$$$$$$              "
+cp_mapa10 : string "               $$$$$$$$$$              "
+cp_mapa11 : string "               $$$$$$$$$$              "
+cp_mapa12 : string "               $$$$$$$$$$              "
+cp_mapa13 : string "               $$$$$$$$$$              "
+cp_mapa14 : string "               $$$$$$$$$$              "
+cp_mapa15 : string "               $$$$$$$$$$              "
+cp_mapa16 : string "               $$$$$$$$$$              "
+cp_mapa17 : string "               $$$$$$$$$$              "
+cp_mapa18 : string "               $$$$$$$$$$              "
+cp_mapa19 : string "               $$$$$$$$$$              "
+cp_mapa20 : string "               $$$$$$$$$$              "
+cp_mapa21 : string "               $$$$$$$$$$              "
+cp_mapa22 : string "               $$$$$$$$$$              "
+cp_mapa23 : string "               $$$$$$$$$$              "
+cp_mapa24 : string "               $$$$$$$$$$              "
+cp_mapa25 : string "                                       "
+cp_mapa26 : string "                                       "
+cp_mapa27 : string "                                       "
+cp_mapa28 : string "                                       "
+cp_mapa29 : string "                                       "
+;OBS: cp_mapa tem uma coluna a menos do que mapa, pois esse ultimo espaco de cada string
+;e' reservado para \0, entao para ficar mais facil mexer na copia do mapa, apagou-se a ultima coluna
+;pois ela e' irrelevante em cp_mapa
 
 
 ;vetor randomico (contem valores aleatorios de 0 a 6)
