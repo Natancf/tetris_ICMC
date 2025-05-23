@@ -1,29 +1,45 @@
-inicializacao e declaracao de variaveis
-	- posicao da peca *
-	- posicao anterior da peca *
-	- vetor de aleatoriedade (ordem das pecas)
-	- rotacao da peca I *
-	- vetor de quadrados ocupados 
-	- tipo da peca *
-	- mapa *
- 
+Inicializacao
+- flag_spawn <- 1 //flag_spawn, caso 1, spawna peca
+
 main
-	- desenha menu
-	- desenha mapa *
-	- inicializa peca (spawn inicial)
-	main_loop
-		- move peca *?
-		- fixa peca 
-		- elimina linha
+- var count
+	-> inc count -> reset a cada 499
+		-> condicao de stop : enter
+- wait enter
+- inicia jogo
+	-> index inicial do vetor randomico <- count
+	-> t_peca <- rand[index inicial]
+- spawn peca
+	-> verifica flag_spawn //caso 0, skip spawn peca
+	-> verificar t_peca
+	-> verifica se é possível spawn //caso não seja, GAME OVER
+	-> definir posição de spawn
+	-> desenha peca
+	-> flag_spawn <- 0
 
-funcoes-------------------------------------------------------------------------------------------------
-
-move peca
-	- recalcula pos *
-		- verifica se esta nas bordas *
-	- desenha peca *
-	- apaga peca *
-fixa peca
-	?
-elimina linha
-	?
+MAIN LOOP
+	- mover peca
+		-> verificar input e recalcula posicao
+			-> mov esquerda
+			-> mov direita
+			-> mov baixo (automático)
+			-> rotaciona
+			-> mov baixo pelo input *
+			-> descer de uma vez *
+			-> apaga desenho da peca
+			-> desenha peca
+	- verifica colisao
+		-> setar flags de colisão
+			-> colisao em baixo
+			-> colisao esquerda
+			-> colisao direita
+			-> colisao em cima *
+		-> se colisao em baixo, entao
+			-> fixa peca
+				-> atualiza mapa
+				-> flag_spawn <- 1
+				-> vetor temporario da ultima peca <- posicao dos quadradinhos da peca fixada (para depois dividir por 40 (divisao inteira))
+	- verifica se completa linha
+		-> se True move tudo que esta acima para baixo
+			-> pontuacao++
+	- spawn peca
