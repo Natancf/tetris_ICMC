@@ -15,8 +15,8 @@ t_peca : var #1
 ; 8-9 I
 ; 10 quadrado
 ; 11-14 T
-; 15-18 Z
-; 19-22 S
+; 15-18 S
+; 19-22 Z
 
 ;se 1, spawn---------------------------------------------------------
 flag_spawn : var #1
@@ -41,7 +41,7 @@ main:
 	loadn r1, #apaga_msg
 	call print_string
 
-	call draw_map
+	call start_game
 
 	halt
 
@@ -134,8 +134,7 @@ start_game:
 	push r1 
 	push r2 
 
-	;desenha_mapa
-	
+	call draw_map
 
 	;inicializa t_peca
 	load r0, rand_index
@@ -196,6 +195,87 @@ draw_map:
 ;END draw_map
 ;--------------------------------------------------
 
+;--------------------------------------------------
+;spawn_peca
+;--------------------------------------------------
+spawn_peca:
+	push FR
+	push r0
+	push r1
+
+	;verificar flag_spawn
+	load r0, flag_spawn
+	loadn r1, #0
+	cmp r0, r1
+	jeq end_spawn_peca ;caso seja 0, nao fazer nada
+
+	;verificar se e possivel spawn
+	load r0, t_peca
+	
+		;Caso L--------------------------
+			loadn r1, #0
+			cmp r0, r1
+			jne spawn_Linv
+
+			jmp end_spawn_peca
+		;--------------------------------
+
+		spawn_Linv: ;Caso Linv-----------
+			loadn r1, #4
+			cmp r0, r1
+			jne spawn_I
+
+			jmp end_spawn_peca
+		;--------------------------------
+
+		spawn_I: ;Caso I-----------------
+			loadn r1, #8
+			cmp r0, r1
+			jne spawn_quadrado
+
+			jmp end_spawn_peca
+		;--------------------------------
+
+		spawn_quadrado: ;Caso quadrado---		
+			loadn r1, #10
+			cmp r0, r1
+			jne spawn_T
+
+			jmp end_spawn_peca
+		;--------------------------------
+
+		spawn_T: ;Caso T-----------------
+			loadn r1, #11
+			cmp r0, r1
+			jne spawn_S
+
+			jmp end_spawn_peca
+		;--------------------------------
+		
+		spawn_S: ;Caso S-----------------
+			loadn r1, #15
+			cmp r0, r1
+			jne spawn_Z
+
+			jmp end_spawn_peca
+		;--------------------------------
+
+		spawn_Z: ;Caso Z-----------------
+
+			jmp end_spawn_peca
+		;--------------------------------
+
+	end_spawn_peca:
+	pop r1	
+	pop r0
+	pop FR
+	rts
+
+
+;--------------------------------------------------
+;END spawn_peca
+;--------------------------------------------------
+
 ;mapa
 mapa0  : string "                                        "
 mapa1  : string "                                        "
@@ -227,6 +307,40 @@ mapa26 : string "                                        "
 mapa27 : string "                                        "
 mapa28 : string "                                        "
 mapa29 : string "                                        "
+
+;copia de mapa
+cp_mapa0  : string "                                        "
+cp_mapa1  : string "                                        "
+cp_mapa2  : string "                                        "
+cp_mapa3  : string "                                        "
+cp_mapa4  : string "                                        "
+cp_mapa5  : string "               $$$$$$$$$$               "
+cp_mapa6  : string "               $$$$$$$$$$               "
+cp_mapa7  : string "               $$$$$$$$$$               "
+cp_mapa8  : string "               $$$$$$$$$$               "
+cp_mapa9  : string "               $$$$$$$$$$               "
+cp_mapa10 : string "               $$$$$$$$$$               "
+cp_mapa11 : string "               $$$$$$$$$$               "
+cp_mapa12 : string "               $$$$$$$$$$               "
+cp_mapa13 : string "               $$$$$$$$$$               "
+cp_mapa14 : string "               $$$$$$$$$$               "
+cp_mapa15 : string "               $$$$$$$$$$               "
+cp_mapa16 : string "               $$$$$$$$$$               "
+cp_mapa17 : string "               $$$$$$$$$$               "
+cp_mapa18 : string "               $$$$$$$$$$               "
+cp_mapa19 : string "               $$$$$$$$$$               "
+cp_mapa20 : string "               $$$$$$$$$$               "
+cp_mapa21 : string "               $$$$$$$$$$               "
+cp_mapa22 : string "               $$$$$$$$$$               "
+cp_mapa23 : string "               $$$$$$$$$$               "
+cp_mapa24 : string "               $$$$$$$$$$               "
+cp_mapa25 : string "                                        "
+cp_mapa26 : string "                                        "
+cp_mapa27 : string "                                        "
+cp_mapa28 : string "                                        "
+cp_mapa29 : string "                                        "
+
+
 
 ;vetor randomico (contem valores aleatorios de 0 a 6)
 rand : var #700

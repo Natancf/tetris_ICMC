@@ -1,18 +1,18 @@
 Inicializacao
-- flag_spawn <- 1 //flag_spawn, caso 1, spawna peca --- PRONTO
+- flag_spawn <- 1 //flag_spawn, caso 1, spawna peca ------------------------------------ PRONTO
 
 main
-- imprime mensagem inicial --- PRONTO
+- imprime mensagem inicial ------------------------------------------------------------- PRONTO
 - wait_start --- PRONTO
 	- var count
 		-> inc count -> reset a cada 499
 			-> condicao de stop : enter
 	- wait enter
-- inicia jogo --- PRONTO
+- inicia jogo -------------------------------------------------------------------------- PRONTO
 	-> desenha_mapa
 	-> index inicial do vetor randomico <- count
 	-> t_peca <- rand[index inicial]
-- spawn peca
+- spawn peca --------------------------------------------------------------------------- EM PROGRESSO
 	-> verifica flag_spawn //caso 0, skip spawn peca
 	-> verificar t_peca
 	-> verifica se é possível spawn //caso não seja, GAME OVER
