@@ -41,6 +41,8 @@ main:
 	loadn r1, #apaga_msg
 	call print_string
 
+	call draw_map
+
 	halt
 
 ;--------------------------------------------------
@@ -124,13 +126,18 @@ wait_start:
 ;--------------------------------------------------
 ;start_game
 ;-------------------------------------------------
+;desenha o mapa e
 ;inicializa o tipo de peca 
 start_game:
 	push FR
-	push r0 ;rand_index
-	push r1
-	push r2
+	push r0 
+	push r1 
+	push r2 
 
+	;desenha_mapa
+	
+
+	;inicializa t_peca
 	load r0, rand_index
 	loadn r1, #rand
 	add r1, r1, r0 ;r1 aponta para rand[r0]
@@ -147,6 +154,47 @@ start_game:
 ;END start_game
 ;--------------------------------------------------
 
+;--------------------------------------------------
+;draw_map
+;--------------------------------------------------
+draw_map:
+        ;Tela: 40x30 (largura x altura)
+	push FR
+        push r0
+        push r1
+        push r2
+        push r3
+        push r4
+
+        loadn r3, #1200 ;condicao de parada do loop
+
+        loadn r0, #0 ;posicao inicial
+        loadn r2, #40 ;para pular para a proxima linha
+
+        loadn r1, #mapa0 ;endereco inicial do mapa
+        loadn r4, #41    ;para pular para a proxima string do mapa, pois string adiciona \0 ao final entao 40 + 1
+
+        draw_map_loop:
+                call print_string
+                add r0, r0, r2 ;r0 aponta para a proxima linha da tela
+                cmp r0, r3 ;verifica se chegou ao fim da tela
+                jeq exit_draw_map_loop
+                add r1, r1, r4 ;r6 aponta para a proxima string do mapa
+                jmp draw_map_loop
+
+
+        exit_draw_map_loop:
+                pop r4
+                pop r3
+                pop r2
+                pop r1
+                pop r0
+		pop FR
+                rts
+
+;--------------------------------------------------
+;END draw_map
+;--------------------------------------------------
 
 ;mapa
 mapa0  : string "                                        "
@@ -154,26 +202,26 @@ mapa1  : string "                                        "
 mapa2  : string "                                        "
 mapa3  : string "                                        "
 mapa4  : string "                                        "
-mapa5  : string "                                        "
-mapa6  : string "                                        "
-mapa7  : string "                                        "
-mapa8  : string "                                        "
-mapa9  : string "                                        "
-mapa10 : string "                                        "
-mapa11 : string "                                        "
-mapa12 : string "                                        "
-mapa13 : string "                                        "
-mapa14 : string "                                        "
-mapa15 : string "                                        "
-mapa16 : string "                                        "
-mapa17 : string "                                        "
-mapa18 : string "                                        "
-mapa19 : string "                                        "
-mapa20 : string "                                        "
-mapa21 : string "                                        "
-mapa22 : string "                                        "
-mapa23 : string "                                        "
-mapa24 : string "                                        "
+mapa5  : string "               $$$$$$$$$$               "
+mapa6  : string "               $$$$$$$$$$               "
+mapa7  : string "               $$$$$$$$$$               "
+mapa8  : string "               $$$$$$$$$$               "
+mapa9  : string "               $$$$$$$$$$               "
+mapa10 : string "               $$$$$$$$$$               "
+mapa11 : string "               $$$$$$$$$$               "
+mapa12 : string "               $$$$$$$$$$               "
+mapa13 : string "               $$$$$$$$$$               "
+mapa14 : string "               $$$$$$$$$$               "
+mapa15 : string "               $$$$$$$$$$               "
+mapa16 : string "               $$$$$$$$$$               "
+mapa17 : string "               $$$$$$$$$$               "
+mapa18 : string "               $$$$$$$$$$               "
+mapa19 : string "               $$$$$$$$$$               "
+mapa20 : string "               $$$$$$$$$$               "
+mapa21 : string "               $$$$$$$$$$               "
+mapa22 : string "               $$$$$$$$$$               "
+mapa23 : string "               $$$$$$$$$$               "
+mapa24 : string "               $$$$$$$$$$               "
 mapa25 : string "                                        "
 mapa26 : string "                                        "
 mapa27 : string "                                        "

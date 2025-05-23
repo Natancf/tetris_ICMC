@@ -9,6 +9,7 @@ main
 			-> condicao de stop : enter
 	- wait enter
 - inicia jogo --- PRONTO
+	-> desenha_mapa
 	-> index inicial do vetor randomico <- count
 	-> t_peca <- rand[index inicial]
 - spawn peca
