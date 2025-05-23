@@ -13,9 +13,6 @@ rand_index : var #1
 
 
 main:
-	loadn r0, #699 ;contador para pegar indice aleatorio
-	loadn r1, #' ' ;para verificar se o jogador iniciou o jogo
-	
 	call wait_start
 
 	halt
@@ -32,7 +29,7 @@ wait_start:
 	push r1
 	push r2
 
-	loadn r0, #499 ;contador
+	loadn r0, #699 ;contador
 	loadn r1, #' ' ;para verificar se o jogador pressionou start
 
 	loop_count:
