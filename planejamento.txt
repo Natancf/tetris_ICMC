@@ -15,7 +15,7 @@ main
 - spawn peca --------------------------------------------------------------------------- EM PROGRESSO
 	-> verifica flag_spawn //caso 0, skip spawn peca -- PRONTO
 	-> verificar t_peca --PRONTO
-	-> verifica se é possível spawn //caso não seja, GAME OVER (flag_perdeu=1) -- EM PROGRESSO
+	-> verifica se é possível spawn //caso não seja, GAME OVER (flag_perdeu=1) -- PRONTO, mas não é possível testar ainda
 	-> definir posição de spawn --PRONTO
 	-> desenha peca
 	-> flag_spawn <- 0

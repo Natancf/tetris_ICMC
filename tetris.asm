@@ -233,7 +233,7 @@ spawn_peca:
 				;	1 p 2
 				;p: posicao
 				; 1, 2, 3: indices de quads
-				;verificar se as posicoes: 258, 259, 260 e 220 estao ocupadas
+				;verificar se as posicoes: 258, 259, 260 ou 220 estao ocupadas
 				
 				loadn r1, #cp_mapa0
 				loadn r3, #'#'	
@@ -271,7 +271,42 @@ spawn_peca:
 			loadn r1, #4
 			cmp r0, r1
 			jne spawn_I
-		
+	
+			;verificar se e' possivel spawn
+				;forma de Linv no spawn
+				;	3
+				;	2 p 1
+				;verificar se 218, 258, 259 ou 260 estao ocupados
+	
+				loadn r1, #cp_mapa0
+				loadn r3, #'#'
+				
+				;verificar se 218 esta' ocupado
+				loadn r2, #218
+				add r2, r1, r2 ;r2 aponta para mapa[218]
+				loadi r2, r2 ;r2 armazena mapa[218]
+				cmp r2, r3 ;verificar se 218 esta' ocupado
+				jeq game_over ;caso esteja ocupado
+				
+				;verificar se 258 esta' ocupado
+				loadn r2, #258
+				add r1, r1, r2 ;r1 aponta para mapa[258]
+				loadi r2, r1 ;r2 armazena mapa[258]
+				cmp r2, r3 ;verifica se 258 esta' ocupado
+				jeq game_over ;caso esteja
+
+				;verificar se 259 esta' ocupado
+				inc r1 ;r1 aponta para mapa[259]
+				loadi r2, r1 ;r2 armazena mapa[259]
+				cmp r2, r3 ;verifica se 259 esta' ocupado
+				jeq game_over
+	
+				;verificar se 260 esta' ocupado
+				inc r2 ;r2 aponta para mapa[260]
+				loadi r2, r1 ;r2 armazena mapa[260]
+				cmp r2, r3 ;verifica se 260 esta' ocupado
+				jeq game_over
+	
 			jmp end_spawn_peca
 		;--------------------------------
 
@@ -279,7 +314,43 @@ spawn_peca:
 			loadn r1, #8
 			cmp r0, r1
 			jne spawn_quadrado
+
+			;verificar se e' possivel spawn
+				;forma da peca I no spawn
+				;	1 p 2 3
+				;verificar se 258, 259, 260 ou 261 estao ocupados			
+
+				loadn r1, #cp_mapa0
+				loadn r3, #'#'
+				
+				;verificar se 258 esta' ocupado	
+				loadn r2, #258
+				add r1, r1, r2 ;r1 aponta para mapa[258]
+				loadi r2, r1 ;r2 armazena mapa[258]
+				;if mapa[258] == # then game_over
+				cmp r2, r3
+				jeq game_over
 		
+				;verificar se 259 esta' ocupado
+				;if mapa[259] == # then game_over
+				inc r1
+				loadi r2, r1
+				cmp r2, r3
+				jeq game_over
+		
+				;verificar se 260 esta' ocupado
+				;if mapa[260] == # then game over
+				inc r1
+				loadi r2, r1
+				cmp r2, r3
+				jeq game_over
+
+				;verificar se 261 esta' ocupado
+				inc r1
+				loadi r2, r1
+				cmp r2, r3
+				jeq game_over
+	
 			jmp end_spawn_peca
 		;--------------------------------
 
@@ -287,6 +358,46 @@ spawn_peca:
 			loadn r1, #10
 			cmp r0, r1
 			jne spawn_T
+
+			;verificar se e' possivel spawn
+				;forma da peca quadrado no spawn
+				;	p 1
+				;	2 3
+				;verificar se 259, 260, 299, 300
+
+				loadn r1, #cp_mapa0
+				loadn r3, #'#'
+			
+				;verificar se 259 esta' ocupado
+				;if mapa[259] == #, then game_over
+				loadn r2, #259
+				add r1, r1, r2 ;r1 aponta para mapa[259]
+				loadi r2, r1 ;r2 armazena[259]
+				cmp r2, r3
+				jeq game_over				
+	
+				;verificar se 260 esta' ocupado
+				;if mapa[260] == #, then game_over
+				inc r1 ;r1 aponta para mapa[260]
+				loadi r2, r1 ;r2 armazena mapa[260]
+				cmp r2, r3
+				jeq game_over
+			
+				;verificar se 299 esta' ocupado
+				;if mapa[299] == #, then game_over
+				loadn r1, #cp_mapa0
+				loadn r2, #299
+				add r1, r1, r2 ;r1 aponta para mapa[299]
+				loadi r2, r1 ;r2 armazena mapa[299]
+				cmp r2, r3
+				jeq game_over
+
+				;verificar se 300 esta' ocupado
+				;if mapa[300] == #, then game_over
+				inc r1 ;r1 aponta para mapa[300]
+				loadi r2, r1 ;r2 armazena mapa[300]
+				cmp r2, r3
+				jeq game_over
 
 			jmp end_spawn_peca
 		;--------------------------------
@@ -296,6 +407,42 @@ spawn_peca:
 			cmp r0, r1
 			jne spawn_S
 
+			;verificar se e' possivel spawn
+				;peca T no spawn
+				;	  3
+				;	1 p 2
+				;verificar se 258, 259, 260 ou 219 esta' ocupado
+			
+				loadn r1, #cp_mapa0
+				loadn r3, #'#'
+
+				;verificar se 219 esta' ocupado
+				;if mapa[219] == #, then game_over
+				loadn r2, #219
+				add r2, r1, r2 ;r2 aponta para mapa[219]
+				loadi r2, r2 ;r2 armazena mapa[219]
+				cmp r2, r3
+				jeq game_over
+				
+				;if mapa[258] == #, then game_over
+				loadn r2, #258
+				add r1, r1, r2 ;r1 aponta para mapa[258]
+				loadi r2, r1 ;r2 armazena mapa[258]
+				cmp r2, r3
+				jeq game_over
+			
+				;if mapa[259] == #, then game_over
+				inc r1 ;r1 aponta para mapa[259]
+				loadi r2, r1 ;r2 armazena mapa[259]
+				cmp r2, r3
+				jeq game_over
+
+				;if mapa[260] == #, then game_over
+				inc r1 ;r1 aponta para mapa[260]
+				loadi r2, r1 ;r2 armazena mapa[260]
+				cmp r2, r3
+				jeq game_over
+
 			jmp end_spawn_peca
 		;--------------------------------
 		
@@ -304,10 +451,85 @@ spawn_peca:
 			cmp r0, r1
 			jne spawn_Z
 
+			;verificar se e' possivel spawn
+				;forma da peca S no spawn
+				;	  2 3
+				;	1 p
+				;verificar se 258, 259, 219 ou 220
+				
+
+				loadn r1, #cp_mapa0
+				loadn r3, #'#'
+
+				;if mapa[258] == #, then game_over
+				loadn r2, #258
+				add r1, r1, r2 ;r1 aponta para mapa[258]
+				loadi r2, r1 ;r2 armazena mapa[258]
+				cmp r2, r3
+				jeq game_over
+	
+				;if mapa[259] == #, then game_over
+				inc r1
+				loadi r2, r1 ;r2 armazena mapa[259]
+				cmp r2, r3
+				jeq game_over
+			
+				;if mapa[219] == #, then game_over
+				loadn r1, #cp_mapa0
+				loadn r2, #219
+				add r1, r1, r2
+				loadi r2, r1
+				cmp r2, r3
+				jeq game_over
+	
+				;if mapa[220] == #, then game_over
+				inc r1
+				loadi r2, r1
+				cmp r2, r3
+				jeq game_over
+
 			jmp end_spawn_peca
 		;--------------------------------
 
 		spawn_Z: ;Caso Z-----------------
+
+			;verificar se e' possivel spawn
+				;forma da peca Z no spawn
+				;     3	2
+				;	p 1
+				;verificar se 218, 219, 259, 260
+
+				loadn r1, #cp_mapa0
+				loadn r3, #'#'
+		
+				;if mapa[218] == #, then game_over
+				loadn r2, #218
+				add r1, r1, r2
+				loadi r2, r1
+				cmp r2, r3
+				jeq game_over
+
+
+				;if mapa[219] == #, then game_over
+				inc r1
+				loadi r2, r1
+				cmp r2, r3
+				jeq game_over
+
+				;if mapa[259] == #, then game_over
+				loadn r1, #cp_mapa0
+				loadn r2, #259
+				add r1, r1, r2
+				loadi r2, r1
+				cmp r2, r3
+				jeq game_over
+	
+				;if mapa[260] == #, then game_over
+				inc r1
+				loadi r2, r1
+				cmp r2, r3
+				jeq game_over
+			
 			jmp end_spawn_peca
 		;--------------------------------
 
