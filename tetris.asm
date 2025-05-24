@@ -539,6 +539,9 @@ spawn_peca:
 		jmp end_spawn_peca
 
 	end_spawn_peca:
+	loadn r1, #0
+	store flag_spawn, r1	
+
 	pop r3
 	pop r2
 	pop r1	
