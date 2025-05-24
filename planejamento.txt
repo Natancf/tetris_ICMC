@@ -31,7 +31,7 @@ MAIN LOOP
 			-> mov baixo pelo input *
 			-> descer de uma vez *
 			-> apaga desenho da peca
-			-> desenha peca
+			-> desenha peca --PRONTO
 	- verifica colisao
 		-> setar flags de colisão
 			-> colisao em baixo
