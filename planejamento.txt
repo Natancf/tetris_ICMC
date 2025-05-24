@@ -12,13 +12,13 @@ main
 	-> desenha_mapa -- PRONTO
 	-> index inicial do vetor randomico <- count --PRONTO
 	-> t_peca <- rand[index inicial] --PRONTO
-- spawn peca --------------------------------------------------------------------------- EM PROGRESSO
+- spawn peca --------------------------------------------------------------------------- PRONTO, mas pode dar problema futuramente
 	-> verifica flag_spawn //caso 0, skip spawn peca -- PRONTO
 	-> verificar t_peca --PRONTO
 	-> verifica se é possível spawn //caso não seja, GAME OVER (flag_perdeu=1) -- PRONTO, mas não é possível testar ainda
 	-> definir posição de spawn --PRONTO
-	-> desenha peca
-		-> calc_quads
+	-> desenha peca --PRONTO
+		-> calc_quads --PRONTO
 	-> flag_spawn <- 0 --PRONTO
 
 MAIN LOOP
