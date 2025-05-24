@@ -548,11 +548,823 @@ spawn_peca:
 	pop r0
 	pop FR
 	rts
-
-
 ;--------------------------------------------------
 ;END spawn_peca
 ;--------------------------------------------------
+
+;--------------------------------------------------
+;draw_peca
+;--------------------------------------------------
+draw_peca:
+	push FR
+	push r0
+	push r1
+	push r2
+	push r3
+	push r4
+	push r5
+
+	;call calc_quads ;calcular a posicao dos quadradinhos
+
+	loadn r0, #'#'
+	
+	;carregar as posicoes dos quadrados
+	load r1, pos
+	loadn r2, #quads
+	inc r2
+	loadi r3, r2
+	inc r2
+	loadi r4, r2
+	inc r2
+	loadi r5, r2
+
+	;imprimir os quadradinhos
+	outchar r0, r1
+	outchar r0, r3
+	outchar r0, r4
+	outchar r0, r5
+	
+	;salvar a posicao atual como posicao anterior
+	store pos_ant, r1
+
+	pop r5
+	pop r4
+	pop r3
+	pop r2
+	pop r1
+	pop r0
+	pop FR
+;--------------------------------------------------
+;END draw_peca
+;--------------------------------------------------
+
+;---------------------------------------------------------
+;calc_quads
+;---------------------------------------------------------
+;calcula os quadradinhos de cada peca
+;parametros:
+;	- pos    : posicao da peca
+;	- t_peca : tipo de peca
+;retorno
+;	variaveis na memoria
+;	quads[0] <- A	
+;	quads[1] <- B
+;	quads[2] <- C
+;	quads[3] <- D
+;	OBS: r0 = A
+
+calc_quads:
+	push FR
+	push r0 ;posicao
+	push r7 ;tipo de peca
+	push r1 ;auxiliar 
+	push r2 ;para verificar o tipo de peca e enderecar a memoria
+	push r3 ;40
+
+	load r0, pos
+	load r7, t_peca
+
+	loadn r3, #40
+
+	;verifica_se_L:
+		loadn r2, #3
+		cmp r7, r2
+		jel if_L
+
+	;verifica_se_linv:
+		loadn r2, #7
+		cmp r7, r2
+		jel if_Linv
+
+	;verifica_se_I:
+		loadn r2, #9
+		cmp r7, r2
+		jel if_I
+	
+	;verifica_se_quad:
+		loadn r2, #10
+		cmp r7, r2
+		jeq if_quad
+
+	;verifica_se_T:
+		loadn r2, #14
+		cmp r7, r2
+		jel if_T
+
+	;verifica_se_S:
+		loadn r2, #18
+		cmp r7, r2
+		jel if_S
+	
+	;verifica_se_Z:
+		loadn r2, #22
+		cmp r7, r2
+		jel if_Z
+
+	jmp fim_calc_quads
+
+	;Peca S-------------------------------------------------------
+	if_S:
+		loadn r2, #quads
+		
+		;switch(r7)
+		;rot_S_0 case 15:
+			loadn r1, #15
+			cmp r1, r7
+			jne rot_S_1
+
+			;OBS:
+			;	  C D
+			;	B A	
+			;
+	
+			;B = A - 1
+			mov r1, r0
+			dec r1
+			inc r2
+			storei r2, r1
+
+			;C = A - 40
+			mov r1, r0
+			sub r1, r1, r3
+			inc r2
+			storei r2, r1
+
+			;D = C + 1
+			inc r1
+			inc r2
+			storei r2, r1
+
+			jmp fim_calc_quads ;break
+
+		rot_S_1: ;case 16:
+			loadn r1, #16
+			cmp r1, r7
+			jne rot_S_2
+
+			;OBS:
+			;	  B
+			;	  A C
+			;	    D
+
+			;B = A - 40
+			mov r1, r0
+			sub r1, r1, r3
+			inc r2
+			storei r2, r1
+
+			;C = A + 1
+			mov r1, r0
+			inc r1
+			inc r2
+			storei r2, r1
+			
+			;D = C + 40
+			add r1, r1, r3
+			inc r2
+			storei r2, r1
+
+			jmp fim_calc_quads ;break
+
+		rot_S_2: ;case 17:
+			loadn r1, #17
+			cmp r1, r7
+			jne rot_S_3
+
+			;OBS:
+			;
+			;	  A B
+			;	D C
+
+			;B = A + 1
+			mov r1, r0
+			inc r1
+			inc r2
+			storei r2, r1
+	
+			;C = A + 40
+			mov r1, r0
+			add r1, r1, r3
+			inc r2
+			storei r2, r1
+
+			;D = C - 1
+			dec r1
+			inc r2
+			storei r2, r1
+
+			jmp fim_calc_quads ;break
+	
+		rot_S_3: ;case 18:
+			
+			;OBS:
+			;	D
+			;	C A
+			;	  B
+
+			;B = A + 40
+			mov r1, r0
+			add r1, r1, r3
+			inc r2
+			storei r2, r1
+
+			;C = A - 1
+			mov r1, r0
+			dec r1
+			inc r2
+			storei r2, r1
+		
+			;D = C - 40
+			sub r1, r1, r3
+			inc r2
+			storei r2, r1
+
+		jmp fim_calc_quads
+
+	;FIM Peca S---------------------------------------------------
+
+	;Peca Z-------------------------------------------------------
+	if_Z:
+		loadn r2, #quads
+
+		;switch(r7)
+		;rot_Z_0 ;case 19
+			loadn r1, #19
+			cmp r1, r7
+			jne rot_Z_1
+	
+			;OBS:
+			;	D C
+			;	  A B
+			;	
+
+			;B = A + 1
+			mov r1, r0
+			inc r1
+			inc r2
+			storei r2, r1
+		
+			;C = A - 40
+			dec r1
+			sub r1, r1, r3
+			inc r2
+			storei r2, r1
+			
+			;D = C - 1
+			dec r1
+			inc r2
+			storei r2, r1
+	
+			jmp fim_calc_quads ;break
+
+		rot_Z_1: ;case 20:
+			loadn r1, #20
+			cmp r1, r7
+			jne rot_Z_2
+			
+			;OBS:
+			;	    D
+			;	  A C
+			;	  B
+
+			;B = A + 40
+			mov r1, r0
+			add r1, r1, r3
+			inc r2
+			storei r2, r1
+		
+			;C = A + 1
+			mov r1, r0
+			inc r1
+			inc r2
+			storei r2, r1
+	
+			;D = C - 40
+			sub r1, r1, r3
+			inc r2
+			storei r2, r1
+		
+			jmp fim_calc_quads ;break
+
+		rot_Z_2: ;case 21:
+			loadn r1, #21
+			cmp r1, r7
+			jne rot_Z_3
+
+			;OBS:
+			;
+			;	B A
+			;	  C D
+
+			;B = A - 1
+			mov r1, r0
+			dec r1
+			inc r2
+			storei r2, r1
+
+			;C = A + 40
+			inc r1
+			add r1, r1, r3
+			inc r2
+			storei r2, r1
+	
+			;D = C + 1
+			inc r1
+			inc r2
+			storei r2, r1
+
+			jmp fim_calc_quads ;break
+
+		rot_Z_3: ;case 22:
+			
+			;OBS:
+			;	  B
+			;	C A
+			;	D
+			
+			;B = A - 40
+			mov r1, r0
+			sub r1, r1, r3
+			inc r2
+			storei r2, r1
+
+
+			;C = A - 1
+			mov r1, r0
+			dec r1
+			inc r2
+			storei r2, r1
+			
+			;D = C + 40
+			add r1, r1, r3
+			inc r2
+			storei r2, r1	
+
+
+		jmp fim_calc_quads
+	;FIM Peca Z---------------------------------------------------
+
+
+	;Peca T-------------------------------------------------------
+	if_T:
+		loadn r2, #quads ;r2 <- endereco de quads
+
+	;rot_T_0
+		loadn r1, #11
+		cmp r1, r7 ;r7 == 11?
+		jne rot_T_1 ;caso falso
+
+		;caso verdadeiro
+		;B = A - 1
+		mov r1, r0
+		dec r1
+		inc r2
+		storei r2, r1
+
+		;C = A + 1
+		mov r1, r0
+		inc r1
+		inc r2
+		storei r2, r1
+
+		;D = A - 40
+		mov r1, r0
+		sub r1, r1, r3
+		inc r2
+		storei r2, r1		
+	
+		;OBS:
+		;	  D
+		;	B A C 
+
+		jmp fim_calc_quads
+
+		rot_T_1:
+		loadn r1, #12
+		cmp r1, r7 ;r7 == 12?
+		jne rot_T_2 ;caso falso
+
+		;caso verdadeiro
+		;B = A - 40
+		mov r1, r0
+		sub r1, r1, r3
+		inc r2
+		storei r2, r1
+
+		;C = A + 40
+		mov r1, r0
+		add r1, r1, r3
+		inc r2
+		storei r2, r1
+			
+		;D = A + 1
+		mov r1, r0
+		inc r1
+		inc r2
+		storei r2, r1
+			
+		;OBS:
+		;	B
+		;	A D
+		;	C
+
+		jmp fim_calc_quads
+
+		rot_T_2:
+		loadn r1, #13
+		cmp r1, r7 ;r7 == 13?
+		jne rot_T_3 ;caso falso
+
+		;caso verdadeiro
+		;B = A + 1
+		mov r1, r0
+		inc r1
+		inc r2
+		storei r2, r1
+
+		;C = A - 1
+		mov r1, r0
+		dec r1
+		inc r2
+		storei r2, r1
+
+
+		;D = A + 40
+		mov r1, r0
+		add r1, r1, r3
+		inc r2
+		storei r2, r1
+
+		;OBS:
+		;	C A B
+		;	  D
+
+		jmp fim_calc_quads
+
+		rot_T_3:
+		;B = A + 40
+		mov r1, r0
+		add r1, r1, r3
+		inc r2
+		storei r2, r1		
+	
+		;C = A - 40
+		mov r1, r0
+		sub r1, r1, r3
+		inc r2
+		storei r2, r1
+	
+		;D = A - 1
+		mov r1, r0
+		dec r1
+		inc r2
+		storei r2, r1
+
+		;OBS:
+		;	  C
+		;	D A
+		;	  B
+
+		jmp fim_calc_quads
+	;FIM peca T---------------------------------------------------
+	;Peca L ------------------------------------------------------
+	if_L:
+		loadn r2, #quads ;r2 <- endereco de quads_L
+		
+		;rot_L_0
+			loadn r1, #0
+			cmp r1, r7; r7 == 0?
+			jne rot_L_1 ;caso falso
+
+			;caso verdadeiro
+			;B = A - 1
+			mov r1, r0
+			dec r1
+			inc r2
+			storei r2, r1 ;B = quads_L[1] = r1
+			
+			;C = A + 1
+			mov r1, r0
+			inc r1
+			inc r2
+			storei r2, r1 ;C = quads_L[2] = r1
+
+			;D = A + 1 - 40
+			sub r1, r1, r3
+			inc r2
+			storei r2, r1 ;D = quads_L[3] = r1
+
+			;OBS:
+			;	    D
+			;	B A C
+			jmp fim_calc_quads
+
+		rot_L_1:
+			loadn r1, #1
+			cmp r1, r7; r7 == 1?
+			jne rot_L_2 ;caso falso
+
+			;caso verdadeiro
+			;B = A - 40
+			loadn r1, #40
+			sub r1, r0, r1
+			inc r2
+			storei r2, r1 ;B = quads_L[1] = r1
+
+			;C = A + 40
+			loadn r1, #40
+			add r1, r0, r1
+			inc r2
+			storei r2, r1 ;C = quads_L[2] = r1
+
+			;D = A + 40 + 1
+			inc r1
+			inc r2
+			storei r2, r1 ;C = quads_L[3] = r1
+
+			;OBS:
+			;	B
+			;	A
+			;	C D
+			jmp fim_calc_quads
+
+		rot_L_2:
+			loadn r1, #2
+			cmp r1, r7 ;r7 == 2
+			jne rot_L_3 ;caso falso
+		
+			;caso verdadeiro
+			;B = A + 1
+			mov r1, r0
+			inc r1
+			inc r2
+			storei r2, r1
+
+
+			;C = A - 1
+			mov r1, r0
+			dec r1
+			inc r2
+			storei r2, r1			
+
+			;D = A - 1 + 40
+			add r1, r3, r1
+			inc r2
+			storei r2, r1
+
+			;OBS:
+			;	C A B
+			;	D 
+	
+			jmp fim_calc_quads
+
+		rot_L_3:
+			;B = A + 40
+			mov r1, r0
+			add r1, r0, r3
+			inc r2
+			storei r2, r1			
+
+			;C = A - 40
+			mov r1, r0
+			sub r1, r1, r3
+			inc r2
+			storei r2, r1			
+		
+			;D = A - 40 - 1
+			dec r1
+			inc r2
+			storei r2, r1			
+		
+			;OBS:
+			;     D	C	
+			;	A
+			;       B
+			jmp fim_calc_quads
+		
+	;FIM Peca L------------------------------------------------------
+	
+	;Peca Linv-------------------------------------------------------
+	if_Linv:
+		loadn r2, #quads 
+		
+		;rot_Linv_0
+			loadn r1, #4
+			cmp r1, r7 ;r7 == 4?
+			jne rot_Linv_1 ;caso falso
+			
+			;caso verdadeiro
+			;B = A + 1
+			mov r1, r0
+			inc r1
+			inc r2
+			storei r2, r1
+
+			;C = A - 1
+			dec r1
+			dec r1
+			inc r2
+			storei r2, r1
+
+			;D = A - 1 - 40
+			sub r1, r1, r3
+			inc r2
+			storei r2, r1		
+
+			;OBS:
+			;	D
+			;	C A B
+
+			jmp fim_calc_quads
+		
+		rot_Linv_1:
+			loadn r1, #5
+			cmp r1, r7 ;r7 == 5?
+			jne rot_Linv_2 ;caso falso
+
+			;caso verdadeiro			
+			;B = A + 40
+			mov r1, r0
+			add r1, r1, r3
+			inc r2
+			storei r2, r1
+
+			;C = A - 40
+			mov r1, r0
+			sub r1, r1, r3
+			inc r2
+			storei r2, r1
+
+			;D = A - 40 + 1
+			inc r1
+			inc r2
+			storei r2, r1			
+
+			;OBS:
+			;	C D
+			;	A
+			;	B
+
+			jmp fim_calc_quads
+
+		rot_Linv_2: 
+			loadn r1, #6
+			cmp r1, r7 ;r7 == 6?
+			jne rot_Linv_3 ;caso falso
+
+			;caso verdadeiro
+			;B = A - 1
+			mov r1, r0
+			dec r1
+			inc r2
+			storei r2, r1
+	
+			;C = A + 1
+			mov r1, r0
+			inc r1
+			inc r2
+			storei r2, r1
+
+			;D = A + 1 + 40
+			add r1, r1, r3
+			inc r2
+			storei r2, r1		
+	
+			;OBS:
+			;	B A C
+			;	    D
+	
+			jmp fim_calc_quads
+
+		rot_Linv_3:
+			;B = A - 40
+			mov r1, r0
+			sub r1, r1, r3
+			inc r2
+			storei r2, r1
+
+			;C = A + 40
+			mov r1, r0
+			add r1, r1, r3
+			inc r2
+			storei r2, r1
+
+			;D = A + 40 - 1
+			dec r1
+			inc r2
+			storei r2, r1
+
+			;OBS:
+			;	  B
+			;	  A
+			;	D C
+	
+			jmp fim_calc_quads
+
+	;FIM Peca Linv---------------------------------------------------
+	;Peca I----------------------------------------------------------
+	if_I:
+		loadn r2, #quads	
+		
+		;rot_I_0
+			loadn r1, #8
+			cmp r1, r7 ;r7 == 8?
+			jne rot_I_1 ;caso falso
+
+			;caso verdadeiro
+			;B = A - 1
+			mov r1, r0
+			dec r1
+			inc r2
+			storei r2, r1
+
+			;C = A + 1
+			mov r1, r0
+			inc r1
+			inc r2
+			storei r2, r1
+	
+			;D = A + 2
+			inc r1
+			inc r2
+			storei r2, r1
+
+			;OBS:
+			;	B A C D
+	
+			jmp fim_calc_quads
+
+		rot_I_1:
+			;B = A - 40
+			mov r1, r0
+			sub r1, r1, r3
+			inc r2
+			storei r2, r1	
+	
+			;C = A + 40
+			mov r1, r0
+			add r1, r1, r3
+			inc r2
+			storei r2, r1
+
+			;D = A + 40 + 40
+			add r1, r1, r3
+			inc r2
+			storei r2, r1
+						
+			;OBS:
+			;	B
+			;	A
+			;       C
+			;       D 
+
+			jmp fim_calc_quads	
+	;FIM peca I-----------------------------------------------------	
+
+	;peca quad------------------------------------------------------
+	if_quad:
+		;B = A + 1
+		loadn r2, #quads
+		mov r1, r0
+		inc r1
+		inc r2
+		storei r2, r1
+
+		;D = A + 1 + 40
+		add r1, r1, r3
+		inc r2
+		storei r2, r1
+		
+
+		;C = A + 1 + 40 - 1
+		dec r1
+		inc r2
+		storei r2, r1
+
+		;OBS:
+		;	A B
+		;	C D 
+		
+
+	;FIM peca quad--------------------------------------------------
+
+	fim_calc_quads:
+	pop r3
+	pop r2
+	pop r1
+	pop r7
+	pop r0
+	pop FR
+	rts
+
+;---------------------------------------------------------
+;FIM calc_quads
+;---------------------------------------------------------
+
+
+
+
+
 
 ;mapa
 mapa0  : string "                                        "
