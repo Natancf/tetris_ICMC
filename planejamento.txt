@@ -18,7 +18,7 @@ main
 	-> verifica se é possível spawn //caso não seja, GAME OVER (flag_perdeu=1) -- PRONTO, mas não é possível testar ainda
 	-> definir posição de spawn --PRONTO
 	-> desenha peca
-	-> flag_spawn <- 0
+	-> flag_spawn <- 0 --PRONTO
 
 MAIN LOOP
 	- mover peca
