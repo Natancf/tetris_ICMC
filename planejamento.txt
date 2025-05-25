@@ -27,7 +27,7 @@ MAIN LOOP
 			-> recalcula posicao --PRONTO
 			-> atualizar posicao -- EM PROGRESSO
 				-> mov esquerda (atualiza posicao) --PRONTO
-				-> mov direita (atualiza posicao)
+				-> mov direita (atualiza posicao)  --PRONTO
 				-> rotaciona (atualiza t_peca)
 				-> mov baixo pelo input *
 				-> descer de uma vez *

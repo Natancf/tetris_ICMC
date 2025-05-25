@@ -47,7 +47,7 @@ t_peca : var #1
 
 static pos, #220 ;posicao inicial da peca
 static pos_ant, #220 ;posicao inicial da peca
-static t_peca, #4 ;peca inicial
+static t_peca, #8 ;peca inicial
 ; t_peca
 ;	0-3 L
 ;	4-7 Linv

@@ -625,21 +625,23 @@ recalc_pos:
 		;se esquerda
 			loadn r2, #'a'
 			cmp r1, r2
-			ceq mv_esq
+			jne recalc_pos_dir			
+
+			call mv_esq
 			jmp exit_verify_input	
 
-		;se direita
+		recalc_pos_dir: ;se direita
 			loadn r2, #'d'
 			cmp r1, r2
-			ceq mv_dir
+			jne recalc_pos_rot			
+
+			call mv_dir
 			jmp exit_verify_input
 
-		;se rotaciona
+		recalc_pos_rot: ;se rotaciona
 			loadn r2, #'w'
 			cmp r1, r2
 			ceq rotate
-			jmp exit_verify_input
-
 
 	exit_verify_input:	
 		pop r2
@@ -732,8 +734,108 @@ mv_esq:
 ;END mv_esq
 ;--------------------------------------------------
 
+;--------------------------------------------------
+;mv_dir
+;--------------------------------------------------
 mv_dir:
-	rts
+	push FR
+	push r0 ;t_peca
+	push r1
+	push r2 
+	push r3 ;40 para operacoes
+	push r4 ;24 para borda direita
+	push r5 
+
+	load r0, t_peca
+
+	loadn r3, #40
+	loadn r4, #24
+
+	;se rotacao que nao e' possivel pos encostar na borda direita (exceto I)
+		loadn r1, #3
+		cmp r0, r1
+		jeq rotacoes_encostam_dir
+		
+		loadn r1, #7
+		cmp r0, r1
+		jeq rotacoes_encostam_dir
+	
+		;I-----------------------
+		loadn r1, #9
+		cmp r0, r1
+		jeq rotacoes_encostam_dir
+
+		loadn r1, #8
+		cmp r0, r1
+		jeq rotacoes_encostam_dir
+		;I-----------------------
+
+		loadn r1, #14
+		cmp r0, r1
+		jeq rotacoes_encostam_dir
+
+		loadn r1, #18
+		cmp r0, r1
+		jeq rotacoes_encostam_dir
+
+		loadn r1, #22
+		cmp r0, r1
+		jeq rotacoes_encostam_dir
+
+		;caso nao seja nenhuma rotacao em que pos encosta na borda dir
+		load r2, pos
+		inc r2
+		mod r5, r2, r3
+		cmp r5, r4
+		jeq exit_verify_t_peca_dir ;caso esteja na borda
+	
+		;caso nao esteja
+		store pos, r2
+		jmp exit_verify_t_peca_dir
+
+	rotacoes_encostam_dir:
+		;verifica se I deitado
+		loadn r1, #8
+		cmp r0, r1
+		jeq mv_dir_I_deitado
+	
+		;caso nao seja I deitado
+		load r2, pos
+		mod r5, r2, r3
+		cmp r5, r4
+		jeq exit_verify_t_peca_dir ;caso esteja na borda
+
+		;caso nao esteja
+		inc r2
+		store pos, r2
+		jmp exit_verify_t_peca_dir 
+		
+	mv_dir_I_deitado:
+		load r2, pos
+		inc r2
+		inc r2
+		mod r5, r2, r3
+		cmp r5, r4
+		jeq exit_verify_t_peca_dir ;caso esteja na borda
+		
+		;caso nao esteja
+		dec r2
+		store pos, r2
+
+	exit_verify_t_peca_dir:
+		pop r5
+		pop r4
+		pop r3
+		pop r2
+		pop r1 
+		pop r0
+		pop FR
+		rts
+;--------------------------------------------------
+;END mv_dir
+;--------------------------------------------------
+
+
 
 rotate:
 	rts
