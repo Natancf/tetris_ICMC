@@ -23,15 +23,17 @@ main
 
 MAIN LOOP
 	- mover peca ---------------------------------------------------------------- EM PROGRESSO
-		-> verificar input e recalcula posicao e tipo de peca
-			-> mov esquerda (atualiza posicao)
-			-> mov direita (atualiza posicao)
-			-> rotaciona (atualiza t_peca)
-			-> mov baixo pelo input *
-			-> descer de uma vez *
-		-> verificar se moveu peca
+		-> verificar input e recalcula posicao --EM PROGRESSO
+			-> recalcula posicao --PRONTO
+			-> atualizar posicao -- EM PROGRESSO
+				-> mov esquerda (atualiza posicao) --PRONTO
+				-> mov direita (atualiza posicao)
+				-> rotaciona (atualiza t_peca)
+				-> mov baixo pelo input *
+				-> descer de uma vez *
+		-> verificar se moveu peca --PRONTO
 			-> caso sim	
-				-> apaga desenho da peca
+				-> apaga desenho da peca --PRONTO
 				-> desenha peca --PRONTO
 	- descer peca (automaticamente)
 		-> delay para descer

@@ -26,7 +26,7 @@ static flag_spawn, #1 ;inicializacao
 rand_index : var #1
 
 ;mensagem inicial----------------------------------------------------
-msg_inicial : string "     Pressione ESPACO para INICIAR!     "                                        
+msg_inicial : string "     Pressione ESPACO para INICIAR.     "                                        
 apaga_msg   : string "                                        "
 
 ;se perdeu
@@ -53,6 +53,9 @@ main:
 
 	call spawn_peca
 
+	main_loop:
+		call mv_peca
+		jmp main_loop
 	halt
 
 ;--------------------------------------------------
@@ -571,15 +574,26 @@ spawn_peca:
 ;--------------------------------------------------
 mv_peca:
 	push FR
-	push r1
-	push r2	
+	push r0
+	push r1	
 
 	;recalcular posicao e tipo peca, baseado no input
 	call recalc_pos
 
-	pop r2
-	pop r1
-	pop FR	
+	;verificar se moveu peca
+	load r0, pos
+	load r1, pos_ant
+	cmp r0, r1
+	jeq end_mv_peca ;caso nao tenha movido
+
+	;caso tenha movido
+	call erase_peca
+	call draw_peca
+
+	end_mv_peca:
+		pop r1
+		pop r0
+		pop FR	
 
 ;--------------------------------------------------
 ;END mv_peca
@@ -642,66 +656,78 @@ recalc_pos:
 ;--------------------------------------------------
 mv_esq:
 	push FR
-	push r0
+	push r0 ;t_peca
 	push r1
+	push r2 
+	push r3 ;40 para operacoes
+	push r4 ;15 para borda esquerda
+	push r5 
 
-	;verificar t_peca
-		load r0, t_peca
+	load r0, t_peca
+
+	loadn r3, #40
+	loadn r4, #15
+
+	;se rotacao que nao e' possivel pos encostar na borda esquerda
+		loadn r1, #1
+		cmp r0, r1
+		jeq rotacoes_encostam_esq
 		
-		;switch(r0){			
-			;case L:
-				loadn r1, #3
-				cmp r0, r1 
-				jgr mv_esq_Linv
-
-				jmp exit_verify_t_peca ;break 
-		
-			mv_esq_Linv: ;case Linv:
-				loadn r1, #7
-				cmp r0, r1
-				jgr mv_esq_I
-
-				jmp exit_verify_t_peca
-
-			mv_esq_I: ;case I
-				loadn r1, #9
-				cmp r0, r1
-				jgr mv_esq_quadrado
-
-				jmp exit_verify_t_peca
-
-			mv_esq_quadrado: ;case quadrado
-				loadn r1, #10
-				cmp r0, r1
-				jne mv_esq_T
-
-				jmp exit_verify_t_peca
-
-			mv_esq_T:
-				loadn r1, #14
-				cmp r0, r1
-				jgr mv_esq_S
-
-				jmp exit_verify_t_peca
+		loadn r1, #5
+		cmp r0, r1
+		jeq rotacoes_encostam_esq
 	
-			mv_esq_S:
-				loadn r1, #18
-				cmp r0, r1
-				jgr mv_esq_Z
+		loadn r1, #9
+		cmp r0, r1
+		jeq rotacoes_encostam_esq
 
-				jmp exit_verify_t_peca
+		loadn r1, #10
+		cmp r0, r1
+		jeq rotacoes_encostam_esq
 
-			mv_esq_Z: ;case Z
-					
-				jmp exit_verify_t_peca
-		;}
+		loadn r1, #12
+		cmp r0, r1
+		jeq rotacoes_encostam_esq
+
+		loadn r1, #16
+		cmp r0, r1
+		jeq rotacoes_encostam_esq
+
+		loadn r1, #20
+		cmp r0, r1
+		jeq rotacoes_encostam_esq
+
+		;caso nao seja nenhuma rotacao em que pos encosta na borda esq
+		load r2, pos
+		dec r2
+		mod r5, r2, r3
+		cmp r5, r4
+		jeq exit_verify_t_peca ;caso esteja na borda
+	
+		;caso nao esteja
+		store pos, r2
+		jmp exit_verify_t_peca
+
+	rotacoes_encostam_esq:
+		load r2, pos
+		mod r5, r2, r3
+		cmp r5, r4
+		jeq exit_verify_t_peca ;caso esteja na borda
+
+		;caso nao esteja
+		dec r2
+		store pos, r2
+		jmp exit_verify_t_peca 
 		
-		exit_verify_t_peca:
-
-	pop r1 
-	pop r0
-	pop FR
-	rts
+	exit_verify_t_peca:
+		pop r5
+		pop r4
+		pop r3
+		pop r2
+		pop r1 
+		pop r0
+		pop FR
+		rts
 ;--------------------------------------------------
 ;END mv_esq
 ;--------------------------------------------------
@@ -755,9 +781,65 @@ draw_peca:
 	pop r1
 	pop r0
 	pop FR
+	rts
 ;--------------------------------------------------
 ;END draw_peca
 ;--------------------------------------------------
+
+;--------------------------------------------------
+;erase_peca
+;--------------------------------------------------
+erase_peca:
+	push FR
+	push r0
+	push r1
+	push r2
+	push r3
+	push r4
+	push r5
+		
+	;salvar pos temporariamente na pilha, pois calc_quads usa pos como parametro
+	load r0, pos
+	push r0 
+	load r0, pos_ant
+	store pos, r0
+
+	call calc_quads ;calcular a posicao dos quadradinhos
+
+	loadn r0, #'$'
+	
+	;carregar as posicoes dos quadrados
+	load r1, pos
+	loadn r2, #quads
+	inc r2
+	loadi r3, r2
+	inc r2
+	loadi r4, r2
+	inc r2
+	loadi r5, r2
+
+	;imprimir os quadradinhos
+	outchar r0, r1
+	outchar r0, r3
+	outchar r0, r4
+	outchar r0, r5
+	
+	;retornar o valor de pos
+	pop r0 ;pega pos da pilha
+	store pos, r0
+
+	pop r5
+	pop r4
+	pop r3
+	pop r2
+	pop r1
+	pop r0
+	pop FR
+	rts
+;--------------------------------------------------
+;END erase_peca
+;--------------------------------------------------
+
 
 ;---------------------------------------------------------
 ;calc_quads
