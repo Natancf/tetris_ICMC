@@ -26,8 +26,10 @@ MAIN LOOP
 		-> verificar input e recalcula posicao --EM PROGRESSO
 			-> recalcula posicao --PRONTO
 			-> atualizar posicao -- EM PROGRESSO
-				-> mov esquerda (atualiza posicao) --PRONTO
-				-> mov direita (atualiza posicao)  --PRONTO
+				-> mov esquerda (atualiza posicao) --EM PROGRESSO
+					-> verificar se é possível mover com base na cópia do mapa
+				-> mov direita (atualiza posicao)  --EM PROGRESSO
+					-> verificar se é possível mover com base na cópia do mapa
 				-> rotaciona (atualiza t_peca)
 				-> mov baixo pelo input *
 				-> descer de uma vez *
