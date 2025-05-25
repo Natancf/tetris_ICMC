@@ -32,6 +32,11 @@ apaga_msg   : string "                                        "
 ;se perdeu
 flag_perdeu : var #1
 
+;variaveis de down_peca
+c_delay   : var #1
+down_flag : var #1
+static down_flag, #0
+
 main:
 	;Impressao da mensagem inicial
 	loadn r0, #560
@@ -560,6 +565,153 @@ spawn_peca:
 ;--------------------------------------------------
 ;END spawn_peca
 ;--------------------------------------------------
+
+;--------------------------------------------------
+;mv_peca
+;--------------------------------------------------
+mv_peca:
+	push FR
+	push r1
+	push r2	
+
+	;recalcular posicao e tipo peca, baseado no input
+	call recalc_pos
+
+	pop r2
+	pop r1
+	pop FR	
+
+;--------------------------------------------------
+;END mv_peca
+;--------------------------------------------------
+
+;--------------------------------------------------
+;recalc_pos
+;--------------------------------------------------
+recalc_pos:
+	push FR
+	push r1 
+	push r2
+
+	;verificar input
+		inchar r1 ;le do teclado
+	
+		;switch(r1){
+			;case 'a':
+				;call mv_esq
+				;break
+			;case 'd':
+				;call mv_dir
+				;break
+			;case 'w':
+				;call rotate
+				;break	
+		;}
+
+		;se esquerda
+			loadn r2, #'a'
+			cmp r1, r2
+			ceq mv_esq
+			jmp exit_verify_input	
+
+		;se direita
+			loadn r2, #'d'
+			cmp r1, r2
+			ceq mv_dir
+			jmp exit_verify_input
+
+		;se rotaciona
+			loadn r2, #'w'
+			cmp r1, r2
+			ceq rotate
+			jmp exit_verify_input
+
+
+	exit_verify_input:	
+		pop r2
+		pop r1
+		pop FR
+		rts
+
+;--------------------------------------------------
+;END recalc_pos
+;--------------------------------------------------
+
+;--------------------------------------------------
+;mv_esq
+;--------------------------------------------------
+mv_esq:
+	push FR
+	push r0
+	push r1
+
+	;verificar t_peca
+		load r0, t_peca
+		
+		;switch(r0){			
+			;case L:
+				loadn r1, #3
+				cmp r0, r1 
+				jgr mv_esq_Linv
+
+				jmp exit_verify_t_peca ;break 
+		
+			mv_esq_Linv: ;case Linv:
+				loadn r1, #7
+				cmp r0, r1
+				jgr mv_esq_I
+
+				jmp exit_verify_t_peca
+
+			mv_esq_I: ;case I
+				loadn r1, #9
+				cmp r0, r1
+				jgr mv_esq_quadrado
+
+				jmp exit_verify_t_peca
+
+			mv_esq_quadrado: ;case quadrado
+				loadn r1, #10
+				cmp r0, r1
+				jne mv_esq_T
+
+				jmp exit_verify_t_peca
+
+			mv_esq_T:
+				loadn r1, #14
+				cmp r0, r1
+				jgr mv_esq_S
+
+				jmp exit_verify_t_peca
+	
+			mv_esq_S:
+				loadn r1, #18
+				cmp r0, r1
+				jgr mv_esq_Z
+
+				jmp exit_verify_t_peca
+
+			mv_esq_Z: ;case Z
+					
+				jmp exit_verify_t_peca
+		;}
+		
+		exit_verify_t_peca:
+
+	pop r1 
+	pop r0
+	pop FR
+	rts
+;--------------------------------------------------
+;END mv_esq
+;--------------------------------------------------
+
+mv_dir:
+	rts
+
+rotate:
+	rts
+
 
 ;--------------------------------------------------
 ;draw_peca

@@ -22,16 +22,27 @@ main
 	-> flag_spawn <- 0 --PRONTO
 
 MAIN LOOP
-	- mover peca
-		-> verificar input e recalcula posicao
-			-> mov esquerda
-			-> mov direita
-			-> mov baixo (automático)
-			-> rotaciona
+	- mover peca ---------------------------------------------------------------- EM PROGRESSO
+		-> verificar input e recalcula posicao e tipo de peca
+			-> mov esquerda (atualiza posicao)
+			-> mov direita (atualiza posicao)
+			-> rotaciona (atualiza t_peca)
 			-> mov baixo pelo input *
 			-> descer de uma vez *
-			-> apaga desenho da peca
-			-> desenha peca --PRONTO
+		-> verificar se moveu peca
+			-> caso sim	
+				-> apaga desenho da peca
+				-> desenha peca --PRONTO
+	- descer peca (automaticamente)
+		-> delay para descer
+		-> flag se desce ou nao
+		-> se down_flag = 1
+			-> verifica se é possível descer (se está no chão ou se encostou em outra peça) (possivelmente desncessário verificar se está no chã)
+			-> atualiza posicao
+			-> apaga peca
+			-> desenha peca
+			-> atualiza flag para 0 (nao descer)	
+
 	- verifica colisao
 		-> setar flags de colisão
 			-> colisao em baixo
