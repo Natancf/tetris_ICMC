@@ -15,9 +15,11 @@ Este projeto é uma implementação do clássico jogo Tetris em Assembly, criado
 
 <!--Os projetos devem conter um Readme explicando o projeto e o software deve estar muito bem comentado!!-->
 ## Controles
-`a` 🠖 move peça para direita
-`d` 🠖 move peça para esquerda
-`w` 🠖 gira peça
+`a` 🠖 move peça para direita 
+
+`d` 🠖 move peça para esquerda 
+
+`w` 🠖 gira peça 
 
 ## Como o Jogo foi feito
 
