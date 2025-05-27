@@ -37,6 +37,10 @@ c_delay   : var #1
 down_flag : var #1
 static down_flag, #0
 
+;variaveis da funcao se_ocupado 
+arg_se_ocupado : var #1 ;posicao
+flag_ocupado   : var #1
+
 main:
 	;Impressao da mensagem inicial
 	loadn r0, #560
@@ -50,6 +54,11 @@ main:
 	call print_string
 
 	call start_game
+
+	;teste
+	loadn r0, #3
+	store t_peca, r0
+	;teste
 
 	call spawn_peca
 
@@ -488,7 +497,55 @@ spawn_peca:
 				inc r1
 				loadi r2, r1 ;r2 armazena mapa[259]
 				cmp r2, r3
-				jeq game_over
+							;X ao lado de 1
+				;encontrar X
+				mov r4, r0 ;r4 = &cp_mapa[pos]
+				
+				;r4 = &cp_mapa[X]
+				dec r4
+				dec r4
+				
+				loadi r4, r4 ;r4 = cp_mapa[X]
+			
+				;verificar se cp_mapa[X] esta ocupado
+				cmp r4, r3
+				jeq end_mv_esq ;caso esteja ocupado
+				;caso nao esteja, verificar outros Xs
+	
+			;X ao lado de 2
+				mov r4, r0
+				
+				;r4 = &cp_mapa[X]
+				inc r4
+				inc r4
+
+				loadi r5, r4 ;r5 = cp_mapa[X]
+				
+				;verificar se esta ocupado
+				cmp r5, r3
+				jeq end_mv_esq ;caso esteja ocupado
+				;caso nao esteja verificar outros Xs
+
+			;X ao lado direito de 3
+				;r4 ja esta apontando para cp_mapa[X], onde X e o ao lado de 2
+				sub r4, r4, r2 ;r4 = &cp_mapa[X], onde X e o ao lado direito de 3
+				
+				loadi r5, r4 ;r5 = cp_mapa[X]
+	
+				;verificar se esta ocupado
+				cmp r5, r3
+				jeq end_mv_esq ;caso esteja ocupado
+
+			;X acima de p
+				dec r4
+				dec r4
+
+				loadi r5, r4
+			
+				cmp r5, r3
+				jeq end_mv_esq
+
+	jeq game_over
 			
 				;if mapa[219] == #, then game_over
 				loadn r1, #cp_mapa0
@@ -658,70 +715,236 @@ recalc_pos:
 ;--------------------------------------------------
 mv_esq:
 	push FR
-	push r0 ;t_peca
-	push r1
-	push r2 
-	push r3 ;40 para operacoes
-	push r4 ;15 para borda esquerda
-	push r5 
+	push r0 ;pos
+	push r1 ;t_peca
+	push r2 ;40
+	push r3 ;1 para verificar flag_ocupado
+	push r4 
+	push r5
 
-	load r0, t_peca
+	load r0, pos
+	load r1, t_peca
+	loadn r2, #40
+	loadn r3, #1 
 
-	loadn r3, #40
-	loadn r4, #15
 
-	;se rotacao que nao e' possivel pos encostar na borda esquerda
-		loadn r1, #1
-		cmp r0, r1
-		jeq rotacoes_encostam_esq
+	;verificar se algum X esta' ocupado
+
+	;switch(t_peca){
+		;case 0:
+			loadn r4, #0
+			cmp r1, r4
+			jne mv_esq_L_1
+
+			;         X 3
+			;     X 1 p 2
 		
-		loadn r1, #5
-		cmp r0, r1
-		jeq rotacoes_encostam_esq
+			;X ao lado de 1
+				;r4 = pos[X]
+				mov r4, r0
+				dec r4
+				dec r4			
 	
-		loadn r1, #9
-		cmp r0, r1
-		jeq rotacoes_encostam_esq
+				store arg_se_ocupado, r4
+				call se_ocupado
+				load r4, flag_ocupado
 
-		loadn r1, #10
-		cmp r0, r1
-		jeq rotacoes_encostam_esq
+				cmp r4, r3
+				jeq end_mv_esq
+			
+			;X acima de p
+				;r4 = pos[X]
+				mov r4, r0
+				sub r4, r4, r2
+				
+				store arg_se_ocupado, r4
+				call se_ocupado
+				load r5, flag_ocupado
+				
+				cmp r5, r3
+				jeq end_mv_esq
 
-		loadn r1, #12
-		cmp r0, r1
-		jeq rotacoes_encostam_esq
+			;caso nenhum dos Xs esteja ocupado
+				dec r0
+				store pos, r0
+					
+			jmp end_mv_esq ;break
 
-		loadn r1, #16
-		cmp r0, r1
-		jeq rotacoes_encostam_esq
+		;case 1:
+		mv_esq_L_1:
+			loadn r4, #1
+			cmp r1, r4
+			jne mv_esq_L_2
 
-		loadn r1, #20
-		cmp r0, r1
-		jeq rotacoes_encostam_esq
+			;     X	1
+			;     X p
+			;     X	2 3 
 
-		;caso nao seja nenhuma rotacao em que pos encosta na borda esq
-		load r2, pos
-		dec r2
-		mod r5, r2, r3
-		cmp r5, r4
-		jeq exit_verify_t_peca ;caso esteja na borda
-	
-		;caso nao esteja
-		store pos, r2
-		jmp exit_verify_t_peca
-
-	rotacoes_encostam_esq:
-		load r2, pos
-		mod r5, r2, r3
-		cmp r5, r4
-		jeq exit_verify_t_peca ;caso esteja na borda
-
-		;caso nao esteja
-		dec r2
-		store pos, r2
-		jmp exit_verify_t_peca 
+			;verificar se X ao lado de P esta' ocupado
+				;r4 = pos[X]
+				mov r4, r0
+				dec r4
+				
+				store arg_se_ocupado, r4
+				call se_ocupado
+				load r5, flag_ocupado
 		
-	exit_verify_t_peca:
+				cmp r5, r3
+				jeq end_mv_esq
+
+			;X ao lado de 1
+				sub r4, r4, r2
+				
+				store arg_se_ocupado, r4
+				call se_ocupado
+				load r5, flag_ocupado
+
+				cmp r5, r3
+				jeq end_mv_esq
+
+			;X ao lado de 2
+				add r4, r4, r2
+				add r4, r4, r2
+				
+				store arg_se_ocupado, r4
+				call se_ocupado
+				load r5, flag_ocupado
+
+				cmp r5, r3
+				jeq end_mv_esq
+
+			;caso nenhum X esteja ocupado
+				dec r0
+				store pos, r0
+
+			jmp end_mv_esq ;break
+
+		;case 2:
+		mv_esq_L_2:
+			loadn r4, #2
+			cmp r4, r1
+			jne mv_esq_L_3
+
+			;	X 2 p 1
+			;	X 3
+			
+			;X ao lado de 2
+				;r4 = pos[X]
+				mov r4, r0
+				dec r4
+				dec r4
+				
+				store arg_se_ocupado, r4
+				call se_ocupado
+				load r5, flag_ocupado
+
+				cmp r5, r3
+				jeq end_mv_esq
+
+			;X ao lado de 3
+				;r4 = pos[X]
+				add r4, r4, r2
+				
+				store arg_se_ocupado, r4
+				call se_ocupado
+				load r5, flag_ocupado	
+
+				cmp r5, r3
+				jeq end_mv_esq
+
+			;caso nenhum X esteja ocupado
+				dec r0
+				store pos, r0
+
+			jmp end_mv_esq ;break
+		
+		;case 3:
+		mv_esq_L_3:
+			loadn r4, #3
+			cmp r4, r1
+			jne mv_esq_Linv_0
+
+			;	X 3 2
+			;	  X p
+			;	  X 1
+			
+			;X ao lado de p
+				mov r4, r0
+				dec r4
+
+				store arg_se_ocupado, r4
+				call se_ocupado
+				load r5, flag_ocupado
+
+				cmp r5, r3
+				jeq end_mv_esq
+			
+			;X ao lado de 1
+				add r4, r4, r2
+
+				store arg_se_ocupado, r4
+				call se_ocupado
+				load r5, flag_ocupado
+
+				cmp r5, r3
+				jeq end_mv_esq
+
+			;X ao lado de 3
+				sub r4, r4, r2
+				sub r4, r4, r2
+				dec r4
+				
+				store arg_se_ocupado, r4
+				call se_ocupado
+				load r5, flag_ocupado
+
+				cmp r5, r3
+				jeq end_mv_esq
+
+			;caso nenhum X esteja ocupado
+				dec r0
+				store pos, r0
+
+			jmp end_mv_esq ;break
+
+		;case 4:
+		mv_esq_Linv_0:
+			loadn r4, #4
+			cmp r4, r1
+			jne mv_esq_Linv_1
+						
+			jmp end_mv_esq ;break
+
+		;case 5:
+		mv_esq_Linv_1:
+			loadn r4, #5
+			cmp r4, r1
+			jne mv_esq_Linv_2
+
+			jmp end_mv_esq ;break
+
+		mv_esq_Linv_2:
+			loadn r4, #6
+			cmp r4, r1
+			jne mv_esq_Linv_3
+
+			jmp end_mv_esq ;break
+
+		mv_esq_Linv_3:
+			loadn r4, #7
+			cmp r4, r1
+			jne mv_esq_I_0
+
+			jmp end_mv_esq ;break
+
+		mv_esq_I_0:
+	
+			jmp_end_mv_esq ;break
+
+	;}	
+
+
+	end_mv_esq:
 		pop r5
 		pop r4
 		pop r3
@@ -839,8 +1062,6 @@ mv_dir:
 
 rotate:
 	rts
-
-
 ;--------------------------------------------------
 ;draw_peca
 ;--------------------------------------------------
@@ -1706,6 +1927,49 @@ calc_quads:
 ;FIM calc_quads
 ;---------------------------------------------------------
 
+;--------------------------------------------------
+;se_ocupado
+;--------------------------------------------------
+;verifica se posicao esta' ocupada no mapa
+;parametros:
+;	arg_se_ocupado : posicao
+;retorno:
+;	flag_ocupado :
+;		1 : ocupado
+;		0 : vazio
+se_ocupado:
+	push FR
+	push r0
+	push r1
+
+	load r0, arg_se_ocupado
+	loadn r1, #cp_mapa0
+
+	add r0, r1, r0 ;r0 = &cp_mapa[arg_se_ocupado]
+	loadi r0, r0 ;r0 = cp_mapa[arg_se_ocupado]
+	
+	loadn r1, #'#'
+	cmp r0, r1
+	jeq set_flag_ocupado_1
+
+	;set_flag_ocupado_0
+		loadn r0, #0
+		jmp end_se_ocupado
+
+	set_flag_ocupado_1:
+		loadn r0, #1
+	
+	end_se_ocupado:	
+		store flag_ocupado, r0			
+
+		pop r1
+		pop r0
+		pop FR
+		rts
+;--------------------------------------------------
+;END se_ocupado
+;--------------------------------------------------
+
 
 
 
@@ -1748,28 +2012,28 @@ cp_mapa0  : string "                                       "
 cp_mapa1  : string "                                       "
 cp_mapa2  : string "                                       "
 cp_mapa3  : string "                                       "
-cp_mapa4  : string "              $$$$$$$$$$$$             "
-cp_mapa5  : string "              $$$$$$$$$$$$             "
-cp_mapa6  : string "              $$$$$$$$$$$$             "
-cp_mapa7  : string "              $$$$$$$$$$$$             "
-cp_mapa8  : string "              $$$$$$$$$$$$             "
-cp_mapa9  : string "              $$$$$$$$$$$$             "
-cp_mapa10 : string "              $$$$$$$$$$$$             "
-cp_mapa11 : string "              $$$$$$$$$$$$             "
-cp_mapa12 : string "              $$$$$$$$$$$$             "
-cp_mapa13 : string "              $$$$$$$$$$$$             "
-cp_mapa14 : string "              $$$$$$$$$$$$             "
-cp_mapa15 : string "              $$$$$$$$$$$$             "
-cp_mapa16 : string "              $$$$$$$$$$$$             "
-cp_mapa17 : string "              $$$$$$$$$$$$             "
-cp_mapa18 : string "              $$$$$$$$$$$$             "
-cp_mapa19 : string "              $$$$$$$$$$$$             "
-cp_mapa20 : string "              $$$$$$$$$$$$             "
-cp_mapa21 : string "              $$$$$$$$$$$$             "
-cp_mapa22 : string "              $$$$$$$$$$$$             "
-cp_mapa23 : string "              $$$$$$$$$$$$             "
-cp_mapa24 : string "              $$$$$$$$$$$$             "
-cp_mapa25 : string "              $$$$$$$$$$$$             "
+cp_mapa4  : string "              ############             "
+cp_mapa5  : string "              #$$$$$$$$$$#             "
+cp_mapa6  : string "              #$$$$$$$$$$#             "
+cp_mapa7  : string "              #$$$$$$$$$$#             "
+cp_mapa8  : string "              #$$$$$$$$$$#             "
+cp_mapa9  : string "              #$$$$$$$$$$#             "
+cp_mapa10 : string "              #$$$$$$$$$$#             "
+cp_mapa11 : string "              #$$$$$$$$$$#             "
+cp_mapa12 : string "              #$$$$$$$$$$#             "
+cp_mapa13 : string "              #$$$$$$$$$$#             "
+cp_mapa14 : string "              #$$$$$$$$$$#             "
+cp_mapa15 : string "              #$$$$$$$$$$#             "
+cp_mapa16 : string "              #$$$$$$$$$$#             "
+cp_mapa17 : string "              #$$$$$$$$$$#             "
+cp_mapa18 : string "              #$$$$$$$$$$#             "
+cp_mapa19 : string "              #$$$$$$$$$$#             "
+cp_mapa20 : string "              #$$$$$$$$$$#             "
+cp_mapa21 : string "              #$$$$$$$$$$#             "
+cp_mapa22 : string "              #$$$$$$$$$$#             "
+cp_mapa23 : string "              #$$$$$$$$$$#             "
+cp_mapa24 : string "              #$$$$$$$$$$#             "
+cp_mapa25 : string "              ############             "
 cp_mapa26 : string "                                       "
 cp_mapa27 : string "                                       "
 cp_mapa28 : string "                                       "
