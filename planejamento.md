@@ -29,11 +29,11 @@ MAIN LOOP
    - [ ] mover peça
 		- [ ] verificar input e recalcula posição
 			- [x] recalcula posição
-			- [ ] atualizar posição
-				- [ ] mov esquerda (atualiza posição)
-					- [ ] verificar se é possível mover com base na cópia do mapa
-				- [ ] mov direita (atualiza posição)
-					- [ ] verificar se é possível mover com base na cópia do mapa
+			- [x] atualizar posição
+				- [x] mov esquerda (atualiza posição)
+					- [x] verificar se é possível mover com base na cópia do mapa
+				- [x] mov direita (atualiza posição)
+					- [x] verificar se é possível mover com base na cópia do mapa
 				- [ ] rotaciona (atualiza t_peca)
 				- [ ] mov baixo pelo input *
 				- [ ] descer de uma vez *
