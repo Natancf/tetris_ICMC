@@ -6,11 +6,12 @@ Este projeto é uma implementação do clássico jogo Tetris em Assembly, criado
 
 ## Como executar tetris_ICMC
 
-1. Clone o repositório:
-    ```sh
-    git clone https://github.com/Natancf/tetris_ICMC
-    ```
-2. Execute o [Processador ICMC](https://github.com/simoesusp/Processador-ICMC)
+1. Faça download do arquivo `tetris.asm` e `charmap.mif`
+2. Abra o simulador do processador [simulador processador giroto](https://proc.giroto.dev/)
+3. Na aba `Screen editor` import o arquivo `charmap.mif` para o simulador
+4. Na aba `File picker` import o arquivo `tetris.asm` para o simulador
+5. Com o arquivo aberto Aperte em `Build` para montar o programa
+6. Na aba `State` do simulador aperte em `Run` para executar o jogo
 
 <!--Os projetos devem conter um Readme explicando o projeto e o software deve estar muito bem comentado!!-->
 ## Controles
