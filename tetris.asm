@@ -41,6 +41,13 @@ static down_flag, #0
 arg_se_ocupado : var #1 ;posicao
 flag_ocupado   : var #1
 
+;variaveis da funcao quads_esq
+esq_quads : var #4
+
+;variaveis da funcao mais_esq
+flag_mais_esq  : var #1
+index_mais_esq : var #1
+
 main:
 	;Impressao da mensagem inicial
 	loadn r0, #560
@@ -54,11 +61,6 @@ main:
 	call print_string
 
 	call start_game
-
-	;teste
-	loadn r0, #3
-	store t_peca, r0
-	;teste
 
 	call spawn_peca
 
@@ -718,233 +720,69 @@ mv_esq:
 	push r0 ;pos
 	push r1 ;t_peca
 	push r2 ;40
-	push r3 ;1 para verificar flag_ocupado
+	push r3 ;1 
 	push r4 
 	push r5
+	push r6 ;quads
+	push r7
 
 	load r0, pos
 	load r1, t_peca
 	loadn r2, #40
-	loadn r3, #1 
+	loadn r3, #1
+	loadn r6, #quads
 
+	;verificar se quads[0] (pos) e' o mais a esquerda
+		loadn r4, #0
+		store index_mais_esq, r4
+		call mais_esq
+		load r4, flag_mais_esq
+		cmp r4, r3
+		jne pos_n_mais_esq ;se nao for o mais a esquerda
 
-	;verificar se algum X esta' ocupado
+		;se for o mais a esquerda, verificar se a esquerda dele esta livre
+		mov r4, r0
+		dec r4
+		store arg_se_ocupado, r4
+		call se_ocupado
+		load r4, flag_ocupado
+		cmp r4, r3
+		jeq end_mv_esq ;se estiver ocupado
 
-	;switch(t_peca){
-		;case 0:
-			loadn r4, #0
-			cmp r1, r4
-			jne mv_esq_L_1
+	pos_n_mais_esq:
+	loadn r5, #1
+	loadn r7, #4 ;condicao de parada do loop	
 
-			;         X 3
-			;     X 1 p 2
+	loop_mv_esq: ;---------------------------------------
+		store index_mais_esq, r5
+		call mais_esq
+		load r4, flag_mais_esq
+		cmp r4, r3
+		jne fim_loop ;se nao for o mais a esquerda
+				
+		;se for o mais a esquerda
+		add r4, r6, r5
+		loadi r4, r4
+		dec r4 
+		store arg_se_ocupado, r4
+		call se_ocupado
+		load r4, flag_ocupado
+		cmp r4, r3
+		jeq end_mv_esq
 		
-			;X ao lado de 1
-				;r4 = pos[X]
-				mov r4, r0
-				dec r4
-				dec r4			
-	
-				store arg_se_ocupado, r4
-				call se_ocupado
-				load r4, flag_ocupado
+		fim_loop:
+		inc r5
+		cmp r5, r7
+		jne loop_mv_esq
+	;----------------------------------------------------
 
-				cmp r4, r3
-				jeq end_mv_esq
-			
-			;X acima de p
-				;r4 = pos[X]
-				mov r4, r0
-				sub r4, r4, r2
-				
-				store arg_se_ocupado, r4
-				call se_ocupado
-				load r5, flag_ocupado
-				
-				cmp r5, r3
-				jeq end_mv_esq
-
-			;caso nenhum dos Xs esteja ocupado
-				dec r0
-				store pos, r0
-					
-			jmp end_mv_esq ;break
-
-		;case 1:
-		mv_esq_L_1:
-			loadn r4, #1
-			cmp r1, r4
-			jne mv_esq_L_2
-
-			;     X	1
-			;     X p
-			;     X	2 3 
-
-			;verificar se X ao lado de P esta' ocupado
-				;r4 = pos[X]
-				mov r4, r0
-				dec r4
-				
-				store arg_se_ocupado, r4
-				call se_ocupado
-				load r5, flag_ocupado
-		
-				cmp r5, r3
-				jeq end_mv_esq
-
-			;X ao lado de 1
-				sub r4, r4, r2
-				
-				store arg_se_ocupado, r4
-				call se_ocupado
-				load r5, flag_ocupado
-
-				cmp r5, r3
-				jeq end_mv_esq
-
-			;X ao lado de 2
-				add r4, r4, r2
-				add r4, r4, r2
-				
-				store arg_se_ocupado, r4
-				call se_ocupado
-				load r5, flag_ocupado
-
-				cmp r5, r3
-				jeq end_mv_esq
-
-			;caso nenhum X esteja ocupado
-				dec r0
-				store pos, r0
-
-			jmp end_mv_esq ;break
-
-		;case 2:
-		mv_esq_L_2:
-			loadn r4, #2
-			cmp r4, r1
-			jne mv_esq_L_3
-
-			;	X 2 p 1
-			;	X 3
-			
-			;X ao lado de 2
-				;r4 = pos[X]
-				mov r4, r0
-				dec r4
-				dec r4
-				
-				store arg_se_ocupado, r4
-				call se_ocupado
-				load r5, flag_ocupado
-
-				cmp r5, r3
-				jeq end_mv_esq
-
-			;X ao lado de 3
-				;r4 = pos[X]
-				add r4, r4, r2
-				
-				store arg_se_ocupado, r4
-				call se_ocupado
-				load r5, flag_ocupado	
-
-				cmp r5, r3
-				jeq end_mv_esq
-
-			;caso nenhum X esteja ocupado
-				dec r0
-				store pos, r0
-
-			jmp end_mv_esq ;break
-		
-		;case 3:
-		mv_esq_L_3:
-			loadn r4, #3
-			cmp r4, r1
-			jne mv_esq_Linv_0
-
-			;	X 3 2
-			;	  X p
-			;	  X 1
-			
-			;X ao lado de p
-				mov r4, r0
-				dec r4
-
-				store arg_se_ocupado, r4
-				call se_ocupado
-				load r5, flag_ocupado
-
-				cmp r5, r3
-				jeq end_mv_esq
-			
-			;X ao lado de 1
-				add r4, r4, r2
-
-				store arg_se_ocupado, r4
-				call se_ocupado
-				load r5, flag_ocupado
-
-				cmp r5, r3
-				jeq end_mv_esq
-
-			;X ao lado de 3
-				sub r4, r4, r2
-				sub r4, r4, r2
-				dec r4
-				
-				store arg_se_ocupado, r4
-				call se_ocupado
-				load r5, flag_ocupado
-
-				cmp r5, r3
-				jeq end_mv_esq
-
-			;caso nenhum X esteja ocupado
-				dec r0
-				store pos, r0
-
-			jmp end_mv_esq ;break
-
-		;case 4:
-		mv_esq_Linv_0:
-			loadn r4, #4
-			cmp r4, r1
-			jne mv_esq_Linv_1
-						
-			jmp end_mv_esq ;break
-
-		;case 5:
-		mv_esq_Linv_1:
-			loadn r4, #5
-			cmp r4, r1
-			jne mv_esq_Linv_2
-
-			jmp end_mv_esq ;break
-
-		mv_esq_Linv_2:
-			loadn r4, #6
-			cmp r4, r1
-			jne mv_esq_Linv_3
-
-			jmp end_mv_esq ;break
-
-		mv_esq_Linv_3:
-			loadn r4, #7
-			cmp r4, r1
-			jne mv_esq_I_0
-
-			jmp end_mv_esq ;break
-
-		mv_esq_I_0:
-	
-			jmp_end_mv_esq ;break
-
-	;}	
-
+	;caso nenhum quadradinho a esquerda esteja ocupado
+		dec r0
+		store pos, r0
 
 	end_mv_esq:
+		pop r7
+		pop r6
 		pop r5
 		pop r4
 		pop r3
@@ -1970,10 +1808,157 @@ se_ocupado:
 ;END se_ocupado
 ;--------------------------------------------------
 
+;--------------------------------------------------
+;mais_esq
+;--------------------------------------------------
+;se quadradinho e o mais a esquerda
+;parametros 
+;	quads
+;	pos
+;	index_mais_esq : index do quadradinho a ser verificado
+;retorno
+;	flag_mais_esq: 0 ou 1
+;	0 : nao e o mais a esquerda
+;	1 : e o mais a esquerda
+mais_esq:
+	push FR
+	push r0 ;posicao do quadradinho a ser verificado
+	push r1 ;pos (inicialmente), posteriormente quads a ser comparado
+	push r2 ;quads 
+	push r3 
+	push r4 
+	push r5 
+	push r6 ;40
 
+	;inicializacoes
+	load r1, pos
+	load r2, quads
+	loadn r6, #40
 
+	;inicializacao da flag
+	loadn r3, #1
+	store flag_mais_esq, r3
 
+	;verifica se index indica pos
+	loadn r3, #0
+	load r4, index_mais_esq
+	cmp r3, r4
+	jne mais_esq_outros_quads
 
+	load r0, pos
+	jmp mais_esq_verificacoes
+
+	mais_esq_outros_quads:
+		add r0, r2, r4 ;r0 = &quads[i]
+		loadi r0, r0 ;r0 = quads[i] 
+
+	mais_esq_verificacoes:
+		;verificar em relacao a quads[0] (pos)
+			;verificar se e' o mesmo quadrado
+			cmp r0, r1
+			jeq mais_esq_quads1 ;caso seja skip
+			
+			;verificar se esta na mesma linha
+			div r3, r0, r6
+			div r4, r1, r6
+			cmp r3, r4
+			jne mais_esq_quads1 ;caso nao esteja na mesma linha skip
+			
+			;verificar se quads[i] esta mais a esquerda que quads[0]
+			cmp r0, r1
+			jle mais_esq_quads1 ; se for o mais a esquerda
+
+			;caso nao seja
+			loadn r3, #0
+			store flag_mais_esq, r3
+			jmp end_mais_esq
+
+		;em relacao a quads[1]
+		mais_esq_quads1:
+			inc r2
+			loadi r1, r2
+			
+			;verificar se e' o mesmo quadrado
+			cmp r0, r1
+			jeq mais_esq_quads2
+			
+			;verificar se esta na mesma linha
+			div r3, r0, r6
+			div r4, r1, r6
+			cmp r3, r4
+			jne mais_esq_quads2
+
+			;verificar se quads[i] esta mais a esquerda que quads[1]
+			cmp r0, r1
+			jle mais_esq_quads2
+
+			;caso nao seja
+			loadn r3, #0
+			store flag_mais_esq, r3
+			jmp end_mais_esq
+
+		;em relacao a quads[2]
+		mais_esq_quads2:
+			inc r2
+			loadi r1, r2
+			
+			;verificar se e' o mesmo quadrado
+			cmp r0, r1
+			jeq mais_esq_quads3
+			
+			;verificar se esta na mesma linha
+			div r3, r0, r6
+			div r4, r1, r6
+			cmp r3, r4
+			jne mais_esq_quads3
+
+			;verificar se quads[i] esta mais a esquerda que quads[2]
+			cmp r0, r1
+			jle mais_esq_quads3
+
+			;caso nao seja
+			loadn r3, #0
+			store flag_mais_esq, r3
+			jmp end_mais_esq
+
+		mais_esq_quads3:
+			inc r2
+			loadi r1, r2
+			
+			;verificar se e' o mesmo quadrado
+			cmp r0, r1
+			jeq end_mais_esq
+			
+			;verificar se esta na mesma linha
+			div r3, r0, r6
+			div r4, r1, r6
+			cmp r3, r4
+			jne end_mais_esq
+
+			;verificar se quads[i] esta mais a esquerda que quads[3]
+			cmp r0, r1
+			jle end_mais_esq
+
+			;caso nao seja
+			loadn r3, #0
+			store flag_mais_esq, r3
+			jmp end_mais_esq
+
+	end_mais_esq:
+		pop r6
+		pop r5
+		pop r4
+		pop r3
+		pop r2
+		pop r1
+		pop r0
+		pop FR
+		rts
+
+	
+;--------------------------------------------------
+;END mais_esq
+;--------------------------------------------------
 
 ;mapa
 mapa0  : string "                                        "
