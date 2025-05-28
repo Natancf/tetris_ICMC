@@ -1,7 +1,0 @@
-possiveis correções de bugs
-	- adicionar call calc_quads em mv_dir e mv_esq ou mv_peca
-
-
-remover teste que força spawn da peça L em pé
-alterar de volta o valor de posição de spawn em spawn_peca
-retornar cp_mapa ao normal

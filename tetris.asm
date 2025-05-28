@@ -65,8 +65,6 @@ main:
 
 	call start_game
 
-	loadn r0, #1
-	store t_peca, r0
 	call spawn_peca
 
 	main_loop:
@@ -240,7 +238,7 @@ spawn_peca:
 	jeq end_spawn_peca ;caso seja 0, nao fazer nada
 
 	;definicao da posicao inicial da peca
-	loadn r2, #295 ;todos tem spawn em 259, exceto I e quadrado, que e 219
+	loadn r2, #259 ;todos tem spawn em 259, exceto I e quadrado, que e 219
 	store pos, r2
 
 	;verificar se e possivel spawn
@@ -737,6 +735,8 @@ mv_esq:
 	push r5
 	push r6 ;quads
 	push r7
+
+	call calc_quads
 
 	load r0, pos
 	load r1, t_peca
@@ -2047,6 +2047,8 @@ mais_esq:
 	push r5 
 	push r6 ;40
 
+	call calc_quads
+
 	;inicializacoes
 	load r1, pos
 	loadn r2, #quads
@@ -2196,6 +2198,8 @@ mais_dir:
 	push r4 
 	push r5 
 	push r6 ;40
+
+	call calc_quads
 
 	;inicializacoes
 	load r1, pos
@@ -2363,10 +2367,10 @@ cp_mapa1  : string "                                       "
 cp_mapa2  : string "                                       "
 cp_mapa3  : string "                                       "
 cp_mapa4  : string "              ############             "
-cp_mapa5  : string "              #$$#$$$$$$$#             "
-cp_mapa6  : string "              #$$#$$$$$$$#             "
-cp_mapa7  : string "              #$$#$$$$$$$#             "
-cp_mapa8  : string "              #$$#$$$$$$$#             "
+cp_mapa5  : string "              #$$$$$$$$$$#             "
+cp_mapa6  : string "              #$$$$$$$$$$#             "
+cp_mapa7  : string "              #$$$$$$$$$$#             "
+cp_mapa8  : string "              #$$$$$$$$$$#             "
 cp_mapa9  : string "              #$$$$$$$$$$#             "
 cp_mapa10 : string "              #$$$$$$$$$$#             "
 cp_mapa11 : string "              #$$$$$$$$$$#             "
