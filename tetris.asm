@@ -11,6 +11,8 @@ quads : var #4 ;o primeiro elemento do vetor esta inutilizado, mas manter, pois 
 ;tipo de peca e rotacao atual-----------------------------------------
 t_peca     : var #1
 ant_t_peca : var #1
+var_rot_I  : var #1
+static var_rot_I, #0
 ; 0-3 L
 ; 4-7 Linv
 ; 8-9 I
@@ -502,55 +504,7 @@ spawn_peca:
 				inc r1
 				loadi r2, r1 ;r2 armazena mapa[259]
 				cmp r2, r3
-							;X ao lado de 1
-				;encontrar X
-				mov r4, r0 ;r4 = &cp_mapa[pos]
-				
-				;r4 = &cp_mapa[X]
-				dec r4
-				dec r4
-				
-				loadi r4, r4 ;r4 = cp_mapa[X]
-			
-				;verificar se cp_mapa[X] esta ocupado
-				cmp r4, r3
-				jeq end_mv_esq ;caso esteja ocupado
-				;caso nao esteja, verificar outros Xs
-	
-			;X ao lado de 2
-				mov r4, r0
-				
-				;r4 = &cp_mapa[X]
-				inc r4
-				inc r4
-
-				loadi r5, r4 ;r5 = cp_mapa[X]
-				
-				;verificar se esta ocupado
-				cmp r5, r3
-				jeq end_mv_esq ;caso esteja ocupado
-				;caso nao esteja verificar outros Xs
-
-			;X ao lado direito de 3
-				;r4 ja esta apontando para cp_mapa[X], onde X e o ao lado de 2
-				sub r4, r4, r2 ;r4 = &cp_mapa[X], onde X e o ao lado direito de 3
-				
-				loadi r5, r4 ;r5 = cp_mapa[X]
-	
-				;verificar se esta ocupado
-				cmp r5, r3
-				jeq end_mv_esq ;caso esteja ocupado
-
-			;X acima de p
-				dec r4
-				dec r4
-
-				loadi r5, r4
-			
-				cmp r5, r3
-				jeq end_mv_esq
-
-	jeq game_over
+				jeq game_over
 			
 				;if mapa[219] == #, then game_over
 				loadn r1, #cp_mapa0
@@ -1083,10 +1037,9 @@ rotate:
 				jmp end_rotate
 			;---------------------------------------------------------------------
 
-
-
 		;case I
 		rot_case_I:
+
 
 	;}
 
