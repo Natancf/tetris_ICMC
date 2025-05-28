@@ -868,183 +868,179 @@ rotate:
 	loadn r5, #cp_mapa0
 	
 
-	;switch(t_peca){
-		;case L, Linv, quad, T, S, Z:
-			loadn r4, #8
-			cmp r1, r4
-			jeq rot_case_I
+	;verificar se reset
+	loadn r4, #3
+	cmp r1, r4
+	jel rot_case_L
 
-			loadn r4, #9
-			cmp r1, r4
-			jeq rot_case_I
+	loadn r4, #7
+	cmp r1, r4
+	jel rot_case_Linv
 
-			loadn r4, #3
-			cmp r1, r4
-			jel rot_case_L
+	loadn r4, #9
+	cmp r1, r4
+	jel rot_case_I
 
-			loadn r4, #7
-			cmp r1, r4
-			jel rot_case_Linv
+	loadn r4, #10 ;caso quadrado
+	cmp r1, r4
+	jeq rts_rot_reset
 
-			loadn r4, #10 ;caso quadrado
-			cmp r1, r4
-			jeq rts_rot_reset
+	loadn r4, #14
+	cmp r1, r4
+	jel rot_case_T
+	
+	loadn r4, #18
+	cmp r1, r4
+	jel rot_case_S
+
+	loadn r4, #22
+	cmp r1, r4
+	jel rot_case_Z
+
+	;verificar se e' a ultima rotacao
+		n_ultima_rot:
+			;caso nao seja a ultima rotacao
+			mov r4, r1 
+			inc r4
+
+		rts_rot_reset: ;retorno do reset, caso seja ultima rotacao
+
+	;verificar se e' possivel rotacionar
+		store t_peca, r4 ;atualizar t_peca para utilizar calc_quads
+		call calc_quads
 		
-			loadn r4, #14
-			cmp r1, r4
-			jel rot_case_T
+		;verificar se algum dos quadradinhos da proxima rotacao estao ocupados
+			loadn r7, #3
+			loadn r6, #'#'					
+
+			rot_switch_loop:
+				add r4, r2, r7 ;r4 = &quads[i]
+				loadi r4, r4 ;r4 = quads[i]
+				add r4, r5, r4 ;r4 = &cp_mapa[quads[i]]
+				loadi r4, r4 ;r4 = cp_mapa[quads[i]]
+				cmp r4, r6
+				jeq se_possivel_mover
+				dec r7
+				jnz rot_switch_loop			
 			
-			loadn r4, #18
-			cmp r1, r4
-			jel rot_case_S
-		
-			loadn r4, #22
-			cmp r1, r4
-			jel rot_case_Z
-
-			;verificar se e' a ultima rotacao
-				n_ultima_rot:
-					;caso nao seja a ultima rotacao
-					mov r4, r1 
-					inc r4
-	 
-				rts_rot_reset: ;retorno do reset, caso seja ultima rotacao
-		
-			;verificar se e' possivel rotacionar
-				store t_peca, r4 ;atualizar t_peca para utilizar calc_quads
-				call calc_quads
-				
-				;verificar se algum dos quadradinhos da proxima rotacao estao ocupados
-					loadn r7, #3
-					loadn r6, #'#'					
-
-					rot_switch_loop:
-						add r4, r2, r7 ;r4 = &quads[i]
-						loadi r4, r4 ;r4 = quads[i]
-						add r4, r5, r4 ;r4 = &cp_mapa[quads[i]]
-						loadi r4, r4 ;r4 = cp_mapa[quads[i]]
-						cmp r4, r6
-						jeq se_possivel_mover
-						dec r7
-						jnz rot_switch_loop			
-					
-					;caso nenhum dos quadradinhos esteja ocupado
-						;manter t_peca atualizado
-						jmp end_rotate
-
-			;sub-rotinas da funcao rotate (caso nao I)-----------------------------------------
-			rot_case_L:
-				cmp r1, r4
-				jne n_ultima_rot ;caso nao seja ultima rot
-				
-				loadn r4, #0
-				jmp rts_rot_reset
-
-			rot_case_Linv:
-				cmp r1, r4
-				jne n_ultima_rot
-				
-				loadn r4, #4
-				jmp rts_rot_reset
-
-			rot_case_T:
-				cmp r1, r4
-				jne n_ultima_rot
-				
-				loadn r4, #11
-				jmp rts_rot_reset
-
-			rot_case_S:
-				cmp r1, r4
-				jne n_ultima_rot
-				
-				loadn r4, #15
-				jmp rts_rot_reset
-
-			rot_case_Z:
-				cmp r1, r4
-				jne n_ultima_rot
-				
-				loadn r4, #19
-				jmp rts_rot_reset
-
-			se_possivel_mover:
-				;verificar se alguma posicao futura dos quads estara' ocupada			
-				
-				;verificar se e' possivel mover uma unidade para esquerda
-					mov r4, r0
-					dec r4
-					store pos, r4
-					call calc_quads
-					
-					;verificar se quads estarao ocupados
-						loadn r6, #'#'
-					;quads[0] (pos)
-						add r4, r5, r4 ;r4 = &cp_mapa[pos]	
- 						loadi r4, r4 ;r4 = cp_mapa[pos]
-						cmp r4, r6
-						jeq se_possivel_mover_dir ;caso nao seja possivel mover
-										
-					;demais quads
-						loadn r7, #3
-						loop_se_possivel_mover:		
-							add r4, r2, r7 ;r4 = &quads[i]
-							loadi r4, r4 ;r4 = quads[i]
-							add r4, r5, r4 ;r4 = &cp_mapa[quads[i]]
-							loadi r4, r4 ;r4 = cp_mapa[quads[i]]
-							cmp r4, r6
-							jeq se_possivel_mover_dir				
-							dec r7
-							jnz loop_se_possivel_mover
-
-					;caso seja possivel mover para a esquerda
-						;manter pos atualizada
-						;manter t_peca atualizado
-						jmp end_rotate	
-				
-				;verificar se e' possivel mover para a direita
-				se_possivel_mover_dir:
-					mov r4, r0
-					inc r4
-					store pos, r4
-					call calc_quads
-					
-					;verificar se quads estarao ocupados
-						loadn r6, #'#'
-					;quads[0] (pos)
-						add r4, r5, r4 ;r4 = &cp_mapa[pos]	
- 						loadi r4, r4 ;r4 = cp_mapa[pos]
-						cmp r4, r6
-						jeq n_possivel_mover ;caso nao seja possivel mover
-										
-					;demais quads
-						loadn r7, #3
-						loop_se_possivel_mover_dir:		
-							add r4, r2, r7 ;r4 = &quads[i]
-							loadi r4, r4 ;r4 = quads[i]
-							add r4, r5, r4 ;r4 = &cp_mapa[quads[i]]
-							loadi r4, r4 ;r4 = cp_mapa[quads[i]]
-							cmp r4, r6
-							jeq n_possivel_mover				
-							dec r7
-							jnz loop_se_possivel_mover_dir
-
-					;caso seja possivel mover para a direita
-						;manter pos atualizada
-						;manter t_peca atualizado
-						jmp end_rotate
-
-			n_possivel_mover: ;caso nao seja possivel mover
-				store pos, r0 ;restaura pos
-				store t_peca, r1 ;restaura t_peca
+			;caso nenhum dos quadradinhos esteja ocupado
+				;manter t_peca atualizado
 				jmp end_rotate
-			;---------------------------------------------------------------------
 
-		;case I
-		rot_case_I:
+	;sub-rotinas da funcao rotate-------------------------------------------------
+	rot_case_L:
+		cmp r1, r4
+		jne n_ultima_rot ;caso nao seja ultima rot
+		
+		loadn r4, #0
+		jmp rts_rot_reset
 
+	rot_case_Linv:
+		cmp r1, r4
+		jne n_ultima_rot
+		
+		loadn r4, #4
+		jmp rts_rot_reset
+	
+	rot_case_I:
+		cmp r1, r4
+		jne n_ultima_rot
+		
+		loadn r4, #8
+		jmp rts_rot_reset
 
-	;}
+	rot_case_T:
+		cmp r1, r4
+		jne n_ultima_rot
+		
+		loadn r4, #11
+		jmp rts_rot_reset
+
+	rot_case_S:
+		cmp r1, r4
+		jne n_ultima_rot
+		
+		loadn r4, #15
+		jmp rts_rot_reset
+
+	rot_case_Z:
+		cmp r1, r4
+		jne n_ultima_rot
+		
+		loadn r4, #19
+		jmp rts_rot_reset
+
+	se_possivel_mover:
+		;verificar se alguma posicao futura dos quads estara' ocupada			
+		
+		;verificar se e' possivel mover uma unidade para esquerda
+			mov r4, r0
+			dec r4
+			store pos, r4
+			call calc_quads
+			
+			;verificar se quads estarao ocupados
+				loadn r6, #'#'
+			;quads[0] (pos)
+				add r4, r5, r4 ;r4 = &cp_mapa[pos]	
+ 				loadi r4, r4 ;r4 = cp_mapa[pos]
+				cmp r4, r6
+				jeq se_possivel_mover_dir ;caso nao seja possivel mover
+								
+			;demais quads
+				loadn r7, #3
+				loop_se_possivel_mover:		
+					add r4, r2, r7 ;r4 = &quads[i]
+					loadi r4, r4 ;r4 = quads[i]
+					add r4, r5, r4 ;r4 = &cp_mapa[quads[i]]
+					loadi r4, r4 ;r4 = cp_mapa[quads[i]]
+					cmp r4, r6
+					jeq se_possivel_mover_dir				
+					dec r7
+					jnz loop_se_possivel_mover
+
+			;caso seja possivel mover para a esquerda
+				;manter pos atualizada
+				;manter t_peca atualizado
+				jmp end_rotate	
+		
+		;verificar se e' possivel mover para a direita
+		se_possivel_mover_dir:
+			mov r4, r0
+			inc r4
+			store pos, r4
+			call calc_quads
+			
+			;verificar se quads estarao ocupados
+				loadn r6, #'#'
+			;quads[0] (pos)
+				add r4, r5, r4 ;r4 = &cp_mapa[pos]	
+ 				loadi r4, r4 ;r4 = cp_mapa[pos]
+				cmp r4, r6
+				jeq n_possivel_mover ;caso nao seja possivel mover
+								
+			;demais quads
+				loadn r7, #3
+				loop_se_possivel_mover_dir:		
+					add r4, r2, r7 ;r4 = &quads[i]
+					loadi r4, r4 ;r4 = quads[i]
+					add r4, r5, r4 ;r4 = &cp_mapa[quads[i]]
+					loadi r4, r4 ;r4 = cp_mapa[quads[i]]
+					cmp r4, r6
+					jeq n_possivel_mover				
+					dec r7
+					jnz loop_se_possivel_mover_dir
+
+			;caso seja possivel mover para a direita
+				;manter pos atualizada
+				;manter t_peca atualizado
+				jmp end_rotate
+
+	n_possivel_mover: ;caso nao seja possivel mover
+		store pos, r0 ;restaura pos
+		store t_peca, r1 ;restaura t_peca
+		jmp end_rotate
+	;---------------------------------------------------------------------
 
 	end_rotate:
 		pop r7
