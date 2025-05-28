@@ -342,6 +342,9 @@ spawn_peca:
 			;definicao do spawn
 			loadn r2, #219
 			store pos, r2
+			;reset de var_rot_I
+			loadn r2, #0
+			store var_rot_I, r2
 
 			;verificar se e' possivel spawn
 				;forma da peca I no spawn
