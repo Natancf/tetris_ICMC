@@ -26,15 +26,15 @@ main
 	- [x] flag_spawn <- 0
 
 MAIN LOOP
-   - [ ] mover peça
-		- [ ] verificar input e recalcula posição
+   - [x] mover peça
+		- [x] verificar input e recalcula posição
 			- [x] recalcula posição
 			- [x] atualizar posição
 				- [x] mov esquerda (atualiza posição)
 					- [x] verificar se é possível mover com base na cópia do mapa
 				- [x] mov direita (atualiza posição)
 					- [x] verificar se é possível mover com base na cópia do mapa
-				- [ ] rotaciona (atualiza t_peca)
+				- [x] rotaciona (atualiza t_peca)
 				- [ ] mov baixo pelo input *
 				- [ ] descer de uma vez *
 		- [x] verificar se moveu peca

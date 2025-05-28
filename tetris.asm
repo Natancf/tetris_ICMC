@@ -9,7 +9,10 @@ quads : var #4 ;o primeiro elemento do vetor esta inutilizado, mas manter, pois 
 ;calc_quads nao funciona
 
 ;tipo de peca e rotacao atual-----------------------------------------
-t_peca : var #1
+t_peca     : var #1
+ant_t_peca : var #1
+var_rot_I  : var #1
+static var_rot_I, #0
 ; 0-3 L
 ; 4-7 Linv
 ; 8-9 I
@@ -339,6 +342,9 @@ spawn_peca:
 			;definicao do spawn
 			loadn r2, #219
 			store pos, r2
+			;reset de var_rot_I
+			loadn r2, #0
+			store var_rot_I, r2
 
 			;verificar se e' possivel spawn
 				;forma da peca I no spawn
@@ -501,55 +507,7 @@ spawn_peca:
 				inc r1
 				loadi r2, r1 ;r2 armazena mapa[259]
 				cmp r2, r3
-							;X ao lado de 1
-				;encontrar X
-				mov r4, r0 ;r4 = &cp_mapa[pos]
-				
-				;r4 = &cp_mapa[X]
-				dec r4
-				dec r4
-				
-				loadi r4, r4 ;r4 = cp_mapa[X]
-			
-				;verificar se cp_mapa[X] esta ocupado
-				cmp r4, r3
-				jeq end_mv_esq ;caso esteja ocupado
-				;caso nao esteja, verificar outros Xs
-	
-			;X ao lado de 2
-				mov r4, r0
-				
-				;r4 = &cp_mapa[X]
-				inc r4
-				inc r4
-
-				loadi r5, r4 ;r5 = cp_mapa[X]
-				
-				;verificar se esta ocupado
-				cmp r5, r3
-				jeq end_mv_esq ;caso esteja ocupado
-				;caso nao esteja verificar outros Xs
-
-			;X ao lado direito de 3
-				;r4 ja esta apontando para cp_mapa[X], onde X e o ao lado de 2
-				sub r4, r4, r2 ;r4 = &cp_mapa[X], onde X e o ao lado direito de 3
-				
-				loadi r5, r4 ;r5 = cp_mapa[X]
-	
-				;verificar se esta ocupado
-				cmp r5, r3
-				jeq end_mv_esq ;caso esteja ocupado
-
-			;X acima de p
-				dec r4
-				dec r4
-
-				loadi r5, r4
-			
-				cmp r5, r3
-				jeq end_mv_esq
-
-	jeq game_over
+				jeq game_over
 			
 				;if mapa[219] == #, then game_over
 				loadn r1, #cp_mapa0
@@ -645,8 +603,15 @@ mv_peca:
 	load r0, pos
 	load r1, pos_ant
 	cmp r0, r1
-	jeq end_mv_peca ;caso nao tenha movido
+	jne moveu_peca ;caso tenha movido (mudou posicao)
 
+	;caso nao tenha mudado posicao, verificar se mudou t_peca
+	load r0, t_peca
+	load r1, ant_t_peca
+	cmp r0, r1
+	jeq end_mv_peca ;caso nao tenha mudado t_peca
+
+	moveu_peca:
 	;caso tenha movido
 	call erase_peca
 	call draw_peca
@@ -727,6 +692,8 @@ mv_esq:
 	push r5
 	push r6 ;quads
 	push r7
+
+	call calc_quads
 
 	load r0, pos
 	load r1, t_peca
@@ -880,8 +847,217 @@ mv_dir:
 ;END mv_dir
 ;--------------------------------------------------
 
+;--------------------------------------------------
+;rotate
+;--------------------------------------------------
 rotate:
-	rts
+	push FR
+	push r0 ;pos 
+	push r1 ;t_peca
+	push r2 ;quads
+	push r3 ;auxiliar
+	push r4 ;auxiliar 
+	push r5 ;cp_mapa
+ 	push r6 ;auxiliar 
+	push r7	;auxiliar
+
+	load r0, pos
+	load r1, t_peca
+	loadn r2, #quads
+	loadn r3, #40
+	loadn r5, #cp_mapa0
+	
+
+	;verificar se reset
+	loadn r4, #3
+	cmp r1, r4
+	jel rot_case_L
+
+	loadn r4, #7
+	cmp r1, r4
+	jel rot_case_Linv
+
+	loadn r4, #9
+	cmp r1, r4
+	jel rot_case_I
+
+	loadn r4, #10 ;caso quadrado
+	cmp r1, r4
+	jeq rts_rot_reset
+
+	loadn r4, #14
+	cmp r1, r4
+	jel rot_case_T
+	
+	loadn r4, #18
+	cmp r1, r4
+	jel rot_case_S
+
+	loadn r4, #22
+	cmp r1, r4
+	jel rot_case_Z
+
+	;verificar se e' a ultima rotacao
+		n_ultima_rot:
+			;caso nao seja a ultima rotacao
+			mov r4, r1 
+			inc r4
+
+		rts_rot_reset: ;retorno do reset, caso seja ultima rotacao
+
+	;verificar se e' possivel rotacionar
+		store t_peca, r4 ;atualizar t_peca para utilizar calc_quads
+		call calc_quads
+		
+		;verificar se algum dos quadradinhos da proxima rotacao estao ocupados
+			loadn r7, #3
+			loadn r6, #'#'					
+
+			rot_switch_loop:
+				add r4, r2, r7 ;r4 = &quads[i]
+				loadi r4, r4 ;r4 = quads[i]
+				add r4, r5, r4 ;r4 = &cp_mapa[quads[i]]
+				loadi r4, r4 ;r4 = cp_mapa[quads[i]]
+				cmp r4, r6
+				jeq se_possivel_mover
+				dec r7
+				jnz rot_switch_loop			
+			
+			;caso nenhum dos quadradinhos esteja ocupado
+				;manter t_peca atualizado
+				jmp end_rotate
+
+	;sub-rotinas da funcao rotate-------------------------------------------------
+	rot_case_L:
+		cmp r1, r4
+		jne n_ultima_rot ;caso nao seja ultima rot
+		
+		loadn r4, #0
+		jmp rts_rot_reset
+
+	rot_case_Linv:
+		cmp r1, r4
+		jne n_ultima_rot
+		
+		loadn r4, #4
+		jmp rts_rot_reset
+	
+	rot_case_I:
+		cmp r1, r4
+		jne n_ultima_rot
+		
+		loadn r4, #8
+		jmp rts_rot_reset
+
+	rot_case_T:
+		cmp r1, r4
+		jne n_ultima_rot
+		
+		loadn r4, #11
+		jmp rts_rot_reset
+
+	rot_case_S:
+		cmp r1, r4
+		jne n_ultima_rot
+		
+		loadn r4, #15
+		jmp rts_rot_reset
+
+	rot_case_Z:
+		cmp r1, r4
+		jne n_ultima_rot
+		
+		loadn r4, #19
+		jmp rts_rot_reset
+
+	se_possivel_mover:
+		;verificar se alguma posicao futura dos quads estara' ocupada			
+		
+		;verificar se e' possivel mover uma unidade para esquerda
+			mov r4, r0
+			dec r4
+			store pos, r4
+			call calc_quads
+			
+			;verificar se quads estarao ocupados
+				loadn r6, #'#'
+			;quads[0] (pos)
+				add r4, r5, r4 ;r4 = &cp_mapa[pos]	
+ 				loadi r4, r4 ;r4 = cp_mapa[pos]
+				cmp r4, r6
+				jeq se_possivel_mover_dir ;caso nao seja possivel mover
+								
+			;demais quads
+				loadn r7, #3
+				loop_se_possivel_mover:		
+					add r4, r2, r7 ;r4 = &quads[i]
+					loadi r4, r4 ;r4 = quads[i]
+					add r4, r5, r4 ;r4 = &cp_mapa[quads[i]]
+					loadi r4, r4 ;r4 = cp_mapa[quads[i]]
+					cmp r4, r6
+					jeq se_possivel_mover_dir				
+					dec r7
+					jnz loop_se_possivel_mover
+
+			;caso seja possivel mover para a esquerda
+				;manter pos atualizada
+				;manter t_peca atualizado
+				jmp end_rotate	
+		
+		;verificar se e' possivel mover para a direita
+		se_possivel_mover_dir:
+			mov r4, r0
+			inc r4
+			store pos, r4
+			call calc_quads
+			
+			;verificar se quads estarao ocupados
+				loadn r6, #'#'
+			;quads[0] (pos)
+				add r4, r5, r4 ;r4 = &cp_mapa[pos]	
+ 				loadi r4, r4 ;r4 = cp_mapa[pos]
+				cmp r4, r6
+				jeq n_possivel_mover ;caso nao seja possivel mover
+								
+			;demais quads
+				loadn r7, #3
+				loop_se_possivel_mover_dir:		
+					add r4, r2, r7 ;r4 = &quads[i]
+					loadi r4, r4 ;r4 = quads[i]
+					add r4, r5, r4 ;r4 = &cp_mapa[quads[i]]
+					loadi r4, r4 ;r4 = cp_mapa[quads[i]]
+					cmp r4, r6
+					jeq n_possivel_mover				
+					dec r7
+					jnz loop_se_possivel_mover_dir
+
+			;caso seja possivel mover para a direita
+				;manter pos atualizada
+				;manter t_peca atualizado
+				jmp end_rotate
+
+	n_possivel_mover: ;caso nao seja possivel mover
+		store pos, r0 ;restaura pos
+		store t_peca, r1 ;restaura t_peca
+		jmp end_rotate
+	;---------------------------------------------------------------------
+
+	end_rotate:
+		pop r7
+		pop r6
+		pop r5
+		pop r4
+		pop r3
+		pop r2
+		pop r1
+		pop r0
+		pop FR
+		rts
+;--------------------------------------------------
+;END rotate
+;--------------------------------------------------
+
+
 ;--------------------------------------------------
 ;draw_peca
 ;--------------------------------------------------
@@ -916,6 +1092,9 @@ draw_peca:
 	
 	;salvar a posicao atual como posicao anterior
 	store pos_ant, r1
+	;salvar rotacao atual como rotacao anterior
+	load r0, t_peca
+	store ant_t_peca, r0 
 
 	pop r5
 	pop r4
@@ -941,11 +1120,16 @@ erase_peca:
 	push r4
 	push r5
 		
-	;salvar pos temporariamente na pilha, pois calc_quads usa pos como parametro
+	;salvar pos e t_peca temporariamente na pilha, pois calc_quads usa pos e t_peca como parametro
 	load r0, pos
 	push r0 
 	load r0, pos_ant
 	store pos, r0
+
+	load r0, t_peca
+	push r0
+	load r0, ant_t_peca
+	store t_peca, r0
 
 	call calc_quads ;calcular a posicao dos quadradinhos
 
@@ -967,7 +1151,10 @@ erase_peca:
 	outchar r0, r4
 	outchar r0, r5
 	
-	;retornar o valor de pos
+	;retornar o valor de pos e de t_peca
+	pop r0 ;pega t_peca da pilha
+	store t_peca, r0
+
 	pop r0 ;pega pos da pilha
 	store pos, r0
 
@@ -1812,6 +1999,8 @@ mais_esq:
 	push r5 
 	push r6 ;40
 
+	call calc_quads
+
 	;inicializacoes
 	load r1, pos
 	loadn r2, #quads
@@ -1961,6 +2150,8 @@ mais_dir:
 	push r4 
 	push r5 
 	push r6 ;40
+
+	call calc_quads
 
 	;inicializacoes
 	load r1, pos
