@@ -9,7 +9,8 @@ quads : var #4 ;o primeiro elemento do vetor esta inutilizado, mas manter, pois 
 ;calc_quads nao funciona
 
 ;tipo de peca e rotacao atual-----------------------------------------
-t_peca : var #1
+t_peca     : var #1
+ant_t_peca : var #1
 ; 0-3 L
 ; 4-7 Linv
 ; 8-9 I
@@ -49,6 +50,8 @@ flag_mais_esq  : var #1
 index_mais_esq : var #1
 flag_mais_dir  : var #1
 index_mais_dir : var #1
+
+
 
 main:
 	;Impressao da mensagem inicial
@@ -645,8 +648,15 @@ mv_peca:
 	load r0, pos
 	load r1, pos_ant
 	cmp r0, r1
-	jeq end_mv_peca ;caso nao tenha movido
+	jne moveu_peca ;caso tenha movido (mudou posicao)
 
+	;caso nao tenha mudado posicao, verificar se mudou t_peca
+	load r0, t_peca
+	load r1, ant_t_peca
+	cmp r0, r1
+	jeq end_mv_peca ;caso nao tenha mudado t_peca
+
+	moveu_peca:
 	;caso tenha movido
 	call erase_peca
 	call draw_peca
@@ -1062,7 +1072,7 @@ rotate:
 							dec r7
 							jnz loop_se_possivel_mover_dir
 
-					;caso seja possivel mover para a esquerda
+					;caso seja possivel mover para a direita
 						;manter pos atualizada
 						;manter t_peca atualizado
 						jmp end_rotate
@@ -1130,6 +1140,9 @@ draw_peca:
 	
 	;salvar a posicao atual como posicao anterior
 	store pos_ant, r1
+	;salvar rotacao atual como rotacao anterior
+	load r0, t_peca
+	store ant_t_peca, r0 
 
 	pop r5
 	pop r4
@@ -1155,11 +1168,16 @@ erase_peca:
 	push r4
 	push r5
 		
-	;salvar pos temporariamente na pilha, pois calc_quads usa pos como parametro
+	;salvar pos e t_peca temporariamente na pilha, pois calc_quads usa pos e t_peca como parametro
 	load r0, pos
 	push r0 
 	load r0, pos_ant
 	store pos, r0
+
+	load r0, t_peca
+	push r0
+	load r0, ant_t_peca
+	store t_peca, r0
 
 	call calc_quads ;calcular a posicao dos quadradinhos
 
@@ -1181,7 +1199,10 @@ erase_peca:
 	outchar r0, r4
 	outchar r0, r5
 	
-	;retornar o valor de pos
+	;retornar o valor de pos e de t_peca
+	pop r0 ;pega t_peca da pilha
+	store t_peca, r0
+
 	pop r0 ;pega pos da pilha
 	store pos, r0
 
