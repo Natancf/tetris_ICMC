@@ -38,8 +38,9 @@ flag_perdeu : var #1
 ;variaveis de down_peca
 c_delay   : var #1
 t_delay   : var #1 
-static t_delay, #300
-static c_delay, #300
+static t_delay, #60000
+static c_delay, #60000
+
 
 ;variaveis da funcao se_ocupado 
 arg_se_ocupado : var #1 ;posicao
@@ -53,6 +54,16 @@ flag_mais_esq  : var #1
 index_mais_esq : var #1
 flag_mais_dir  : var #1
 index_mais_dir : var #1
+
+;posicoes da ultima peca colocada
+last_peca_pos : var #4
+
+;delay antes de fixar peca
+delay_fixa   : var #1
+t_delay_fixa : var #1
+static delay_fixa, #2
+static t_delay_fixa, #2
+
 
 main:
 	;Impressao da mensagem inicial
@@ -72,6 +83,8 @@ main:
 
 	main_loop:
 		call mv_peca
+		call down_peca
+		call spawn_peca
 		jmp main_loop
 	halt
 
@@ -289,7 +302,7 @@ spawn_peca:
 				cmp r2, r3 ;verificar se 260 esta ocupado
 				jeq game_over ;caso esteja
 
-			jmp end_spawn_peca
+			jmp spawna_peca
 		;--------------------------------
 
 		spawn_Linv: ;Caso Linv-----------
@@ -332,7 +345,7 @@ spawn_peca:
 				cmp r2, r3 ;verifica se 260 esta' ocupado
 				jeq game_over
 	
-			jmp end_spawn_peca
+			jmp spawna_peca
 		;--------------------------------
 
 		spawn_I: ;Caso I-----------------
@@ -383,7 +396,7 @@ spawn_peca:
 				cmp r2, r3
 				jeq game_over
 	
-			jmp end_spawn_peca
+			jmp spawna_peca
 		;--------------------------------
 
 		spawn_quadrado: ;Caso quadrado---		
@@ -435,7 +448,7 @@ spawn_peca:
 				cmp r2, r3
 				jeq game_over
 
-			jmp end_spawn_peca
+			jmp spawna_peca
 		;--------------------------------
 
 		spawn_T: ;Caso T-----------------
@@ -479,7 +492,7 @@ spawn_peca:
 				cmp r2, r3
 				jeq game_over
 
-			jmp end_spawn_peca
+			jmp spawna_peca
 		;--------------------------------
 		
 		spawn_S: ;Caso S-----------------
@@ -524,7 +537,7 @@ spawn_peca:
 				cmp r2, r3
 				jeq game_over
 
-			jmp end_spawn_peca
+			jmp spawna_peca
 		;--------------------------------
 
 		spawn_Z: ;Caso Z-----------------
@@ -566,7 +579,7 @@ spawn_peca:
 				cmp r2, r3
 				jeq game_over
 			
-			jmp end_spawn_peca
+			jmp spawna_peca
 		;--------------------------------
 
 	game_over:
@@ -574,11 +587,12 @@ spawn_peca:
 		store flag_perdeu, r1
 		jmp end_spawn_peca
 
-	end_spawn_peca:
-	call draw_peca
-	loadn r1, #0
-	store flag_spawn, r1	
+	spawna_peca:
+		call draw_peca
+		loadn r1, #0
+		store flag_spawn, r1	
 
+	end_spawn_peca:
 	pop r3
 	pop r2
 	pop r1	
@@ -1072,17 +1086,18 @@ down_peca:
 	push r6 ;quads
 	push r7 ;pos
 
-	load r7, pos
-	loadn r6, #quads
-
 	load r0, c_delay
-	jnz decrementa_delay	
+	loadn r1, #0
+	cmp r0, r1
+	jne decrementa_delay_down_peca	
 
 	;caso c_delay seja 0
 	;reset do delay
 		load r0, t_delay
 		store c_delay, r0
 
+	load r7, pos
+	loadn r6, #quads
 	
 	;descer peca
 	;verificar se e' possivel descer
@@ -1096,12 +1111,12 @@ down_peca:
 		store arg_se_ocupado, r0
 		call se_ocupado
 		load r0, flag_ocupado
-		loadn r1, #'#'
+		loadn r1, #1
 		cmp r0, r1 
 		jeq caso_colisao_em_baixo ;caso pos esteja em colisao
 
 		;verificar se outros quads estao ocupados
-		;r1 ja' possui #
+		;r1 ja' possui 1
 		loadn r2, #3 ;para parar o loop quando 0
 		
 		loop_descer_peca:
@@ -1115,14 +1130,16 @@ down_peca:
 			dec r2
 			jnz loop_descer_peca
 
-		jmp caso_colisao_em_baixo
-
+		;caso nao tenha colisao em baixo
+		;manter pos atualizada
+		call erase_peca
+		call draw_peca
+		jmp end_down_peca
 
 	caso_colisao_em_baixo:						
 		;restaurar pos
 		store pos, r7
-
-
+		call fixa_peca
 
 	end_down_peca:
 		pop r7 ;pos
@@ -1134,14 +1151,121 @@ down_peca:
 		rts
 
 	;sub-rotinas de down_peca
-	decrementa_delay:
+	decrementa_delay_down_peca:
 		dec r0
+		store c_delay, r0
 		jmp end_down_peca 
 
 ;--------------------------------------------------
 ;END down_peca
 ;--------------------------------------------------
 
+;--------------------------------------------------
+;fixa_peca
+;--------------------------------------------------
+fixa_peca:
+	push FR
+	push r0 ;pos
+	push r1 ;quads
+	push r2 ;cp_mapa
+	push r3
+	push r4 ;#
+	push r5
+	push r6 ;last_peca_pos
+	push r7
+
+	;delay
+		load r3, delay_fixa
+		loadn r5, #0
+		cmp r3, r5
+		jne decrementa_delay_fixa		
+
+	;caso delay_fixa = 0, reset
+		load r3, t_delay_fixa
+		store delay_fixa, r3
+
+	load r0, pos
+	loadn r1, #quads
+	loadn r2, #cp_mapa0
+	loadn r4, #'#'
+	loadn r6, #last_peca_pos
+
+	;atualizar cp_mapa e salvar posicoes em last_peca_pos
+	call calc_quads
+
+	;salvar pos (quads[0]) em cp_mapa
+	add r3, r2, r0 ;r3 = &cp_mapa[pos]
+	storei r3, r4 ;cp_mapa[pos] = #
+
+	;salvar pos (quads[0] em last_peca_pos
+	storei r6, r0
+
+	;salvar quads[] em cp_mapa e em last_peca_pos
+	loadn r5, #3 ;para interromper o loop e usar como index
+	loop_fixa_peca:
+		add r3, r1, r5 ;r3 = &quads[i]
+		loadi r3, r3 ;r3 = quads[i]
+
+		add r7, r6, r5 ;r7 = &last_peca_pos[i]
+		storei r7, r3 ;last_peca_pos[i] = quads[i]
+
+		add r3, r2, r3 ;r3 = &cp_mapa[quads[i]]
+		storei r3, r4 ;cp_mapa[quads[i]] = #
+		
+		dec r5
+		jnz loop_fixa_peca
+
+	;atualizar flag de spawn
+	loadn r3, #1
+	store flag_spawn, r3
+
+	;atualizar t_peca
+	loadn r7, #rand
+	load r5, rand_index
+	loadn r3, #699
+	cmp r5, r3
+	jeq reset_rand_index
+
+	;caso rand_index nao esteja no final
+	mov r3, r5
+	inc r3
+	store rand_index, r3
+
+	rts_rand_index:
+	
+	;atualizar t_peca
+	;r7 = &rand[0], r7 permanece apontando para rand
+	add r7, r7, r3 ;r7 = &rand[rand_ant + 1 ou 0(reset)]
+	loadi r7, r7 ;r7 = rand[rand_ant + 1 ou 0(reset)] 
+	store t_peca, r7 ;atualiza t_peca
+
+
+	end_fixa_peca:
+	pop r7
+	pop r6
+	pop r5
+	pop r4
+	pop r3
+	pop r2
+	pop r1
+	pop r0
+	pop FR
+	rts
+
+	;subrotinas da funcao fixa_peca
+	reset_rand_index:
+		loadn r3, #0
+		store rand_index, r3
+		jmp rts_rand_index		
+	decrementa_delay_fixa:
+		dec r3
+		store delay_fixa, r3
+		jmp end_fixa_peca
+
+
+;--------------------------------------------------
+;END fixa_peca
+;--------------------------------------------------
 
 ;--------------------------------------------------
 ;draw_peca
