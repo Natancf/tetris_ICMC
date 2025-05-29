@@ -32,8 +32,10 @@ MAIN LOOP
 			- [x] atualizar posição
 				- [x] mov esquerda (atualiza posição)
 					- [x] verificar se é possível mover com base na cópia do mapa
+                        - [x] verificar se há colisão à esquerda
 				- [x] mov direita (atualiza posição)
 					- [x] verificar se é possível mover com base na cópia do mapa
+                        - [x] verificar se há colisão à direita
 				- [x] rotaciona (atualiza t_peca)
 				- [ ] mov baixo pelo input *
 				- [ ] descer de uma vez *
@@ -45,21 +47,17 @@ MAIN LOOP
 		- [ ] delay para descer
 		- [ ] flag se desce ou nao
 		- [ ] se down_flag = 1
-			- [ ] verifica se é possível descer (se está no chão ou se encostou em outra peça) (possivelmente desnecessário verificar se está no chã)
+			- [ ] verifica se é possível descer (se está no chão ou se encostou em outra peça) (possivelmente desnecessário verificar se está no chão)
+                - [ ] verificar se há colisão em baixo
+                - [ ] se colisão em baixo, então
+                    - [ ] fixa peça
+                    - [ ] atualiza cp_mapa
+                    - [ ] flag_spawn <- 1
+                    - [ ] salvar vetor dos quadradinhos da peça colocada (para verificar se fechou linha)
 			- [ ] atualiza posição
 			- [ ] apaga peca
 			- [ ] desenha peca
 			- [ ] atualiza flag para 0 (nao descer)
-			
-      - [ ] verifica colisão
-		- [ ] setar flags de colisão
-			- [ ] colisao em baixo
-			- [ ] colisao em cima *
-		- [ ] se colisao em baixo, entao
-			- [ ] fixa peca
-				- [ ] atualiza mapa (atualizar copia de mapa)
-				- [ ] flag_spawn <- 1
-				- [ ] vetor temporario da ultima peca <- posicao dos quadradinhos da peca fixada (para depois dividir por 40 (divisao inteira))
 	- [ ] verifica se completa linha
 		- [ ] se True move tudo que esta acima para baixo
 			- [ ] pontuacao++
