@@ -54,8 +54,6 @@ MAIN LOOP
       - [ ] verifica colisão
 		- [ ] setar flags de colisão
 			- [ ] colisao em baixo
-			- [ ] colisao esquerda
-			- [ ] colisao direita
 			- [ ] colisao em cima *
 		- [ ] se colisao em baixo, entao
 			- [ ] fixa peca
