@@ -43,21 +43,21 @@ MAIN LOOP
 			- caso sim	
 				- [x] apaga desenho da peca
 				- [x] desenha peca
-	- [ ] descer peca (automaticamente)
-		- [ ] delay para descer
-		- [ ] flag se desce ou nao
-		- [ ] se down_flag = 1
-			- [ ] verifica se é possível descer (se está no chão ou se encostou em outra peça) (possivelmente desnecessário verificar se está no chão)
-                - [ ] verificar se há colisão em baixo
-                - [ ] se colisão em baixo, então
-                    - [ ] fixa peça
-                    - [ ] atualiza cp_mapa
-                    - [ ] flag_spawn <- 1
-                    - [ ] salvar vetor dos quadradinhos da peça colocada (para verificar se fechou linha)
-			- [ ] atualiza posição
-			- [ ] apaga peca
-			- [ ] desenha peca
-			- [ ] atualiza flag para 0 (nao descer)
+	- [x] descer peca (automaticamente)
+		- [x] delay para descer
+        - [x] se descer
+			- [x] verifica se é possível descer (se está no chão ou se encostou em outra peça) (possivelmente desnecessário verificar se está no chão)
+                - [X] se não for possível descer, então
+                        - [x] fixa peça
+                            - [x] delay antes de fixar a peca
+                            - [x] atualiza cp_mapa
+                            - [x] flag_spawn <- 1
+                            - [x] salvar vetor dos quadradinhos da peça colocada (para verificar se fechou linha)
+                            - [x] atualiza t_peca
+                - [x] caso seja possivel descer 
+                    - [x] atualiza posição
+                    - [x] apaga peca
+                    - [x] desenha peca
 	- [ ] verifica se completa linha
 		- [ ] se True move tudo que esta acima para baixo
 			- [ ] pontuacao++
