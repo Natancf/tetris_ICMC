@@ -37,8 +37,9 @@ flag_perdeu : var #1
 
 ;variaveis de down_peca
 c_delay   : var #1
-down_flag : var #1
-static down_flag, #0
+t_delay   : var #1 
+static t_delay, #300
+static c_delay, #300
 
 ;variaveis da funcao se_ocupado 
 arg_se_ocupado : var #1 ;posicao
@@ -1055,6 +1056,90 @@ rotate:
 		rts
 ;--------------------------------------------------
 ;END rotate
+;--------------------------------------------------
+
+;--------------------------------------------------
+;down_peca
+;--------------------------------------------------
+;parametros
+;	c_delay   : contador para o delay de descer peca
+;	down_flag : para ver se a peca ira' descer ou nao
+down_peca:
+	push FR
+	push r0
+	push r1
+	push r2
+	push r6 ;quads
+	push r7 ;pos
+
+	load r7, pos
+	loadn r6, #quads
+
+	load r0, c_delay
+	jnz decrementa_delay	
+
+	;caso c_delay seja 0
+	;reset do delay
+		load r0, t_delay
+		store c_delay, r0
+
+	
+	;descer peca
+	;verificar se e' possivel descer
+		loadn r0, #40
+		add r0, r7, r0 ;descer pos
+		store pos, r0 ;atualizar pos e restaurar caso nao seja possivel mover para baixo
+		
+		call calc_quads ;calcular a futura posicao dos quadradinhos
+
+		;verificar se pos estara' ocupada
+		store arg_se_ocupado, r0
+		call se_ocupado
+		load r0, flag_ocupado
+		loadn r1, #'#'
+		cmp r0, r1 
+		jeq caso_colisao_em_baixo ;caso pos esteja em colisao
+
+		;verificar se outros quads estao ocupados
+		;r1 ja' possui #
+		loadn r2, #3 ;para parar o loop quando 0
+		
+		loop_descer_peca:
+			add r0, r6, r2 ;r0 = &quads[i]
+			loadi r0, r0 ;r0 = quads[i]
+			store arg_se_ocupado, r0
+			call se_ocupado
+			load r0, flag_ocupado
+			cmp r0, r1
+			jeq caso_colisao_em_baixo ;caso algum quad esteja em colisao
+			dec r2
+			jnz loop_descer_peca
+
+		jmp caso_colisao_em_baixo
+
+
+	caso_colisao_em_baixo:						
+		;restaurar pos
+		store pos, r7
+
+
+
+	end_down_peca:
+		pop r7 ;pos
+		pop r6
+		pop r2
+		pop r1
+		pop r0
+		pop FR
+		rts
+
+	;sub-rotinas de down_peca
+	decrementa_delay:
+		dec r0
+		jmp end_down_peca 
+
+;--------------------------------------------------
+;END down_peca
 ;--------------------------------------------------
 
 
