@@ -33,6 +33,7 @@ apaga_msg   : string "                                        "
 
 ;se perdeu
 flag_perdeu : var #1
+static flag_perdeu, #0
 
 ;variaveis de down_peca
 c_delay   : var #1
@@ -89,6 +90,8 @@ main:
 	loadn r1, #apaga_msg
 	call print_string
 
+	retry:
+
 	call start_game
 
 	call spawn_peca
@@ -98,6 +101,8 @@ main:
 		call down_peca
 		call se_completa_linha
 		call spawn_peca
+		jmp se_perdeu
+		rts_se_perdeu:
 		jmp main_loop
 	halt
 
@@ -1713,6 +1718,89 @@ desce_linha:
 ;--------------------------------------------------
 
 ;--------------------------------------------------
+;se_perdeu
+;--------------------------------------------------
+se_perdeu:
+	push FR
+	push r0
+	push r1
+	push r2
+	push r3
+                           
+	;verificar se a pessoa perdeu
+		loadn r1, #1
+		cmp r0, r1
+		jne end_se_perdeu
+		
+	;caso tenha perdido
+		call draw_game_over
+		inchar r0
+		loadn r1, #' '		
+
+		wait_spacebar_game_over:
+			cmp r0, r1
+			jne wait_spacebar_game_over
+		
+		jmp retry
+
+	end_se_perdeu:
+		pop r3
+		pop r2
+		pop r1
+		pop r0
+		pop FR
+		jmp rts_se_perdeu
+
+;--------------------------------------------------
+;END se_perdeu
+;--------------------------------------------------
+
+;--------------------------------------------------
+;draw_game_over
+;--------------------------------------------------
+draw_game_over:
+        ;Tela: 40x30 (largura x altura)
+	push FR
+        push r0
+        push r1
+        push r2
+        push r3
+        push r4
+
+        loadn r3, #1200 ;condicao de parada do loop
+
+        loadn r0, #0 ;posicao inicial
+        loadn r2, #40 ;para pular para a proxima linha
+
+        loadn r1, #tela_game_over0 ;endereco inicial do mapa
+        loadn r4, #41    ;para pular para a proxima string do mapa, pois string adiciona \0 ao final entao 40 + 1
+
+        draw_game_over_loop:
+                call print_string
+                add r0, r0, r2 ;r0 aponta para a proxima linha da tela
+                cmp r0, r3 ;verifica se chegou ao fim da tela
+                jeq exit_draw_game_over
+                add r1, r1, r4 ;r6 aponta para a proxima string do mapa
+                jmp draw_game_over_loop
+
+
+        exit_draw_game_over:
+                pop r4
+                pop r3
+                pop r2
+                pop r1
+                pop r0
+		pop FR
+                rts
+
+;--------------------------------------------------
+;END draw_game_over
+;--------------------------------------------------
+
+
+
+
+;--------------------------------------------------
 ;draw_peca
 ;--------------------------------------------------
 draw_peca:
@@ -3000,8 +3088,37 @@ cp_mapa29 : string "                                       "
 ;e' reservado para \0, entao para ficar mais facil mexer na copia do mapa, apagou-se a ultima coluna
 ;pois ela e' irrelevante em cp_mapa
 
-;linha vazia
-linha_vazia : string "              #$$$$$$$$$$#             "
+tela_game_over0  : string "                                        "
+tela_game_over1  : string "                                        "
+tela_game_over2  : string "                                        "
+tela_game_over3  : string "                                        "
+tela_game_over4  : string "                                        "
+tela_game_over5  : string "                                        "
+tela_game_over6  : string "                                        "
+tela_game_over7  : string "   #####  ##### ##   ## #####           "
+tela_game_over8  : string "   #      #   # # # # # #               "
+tela_game_over9  : string "   #      #   # #  #  # #               "
+tela_game_over10 : string "   #  ### ##### #     # #####           "
+tela_game_over11 : string "   #   #  #   # #     # #               "
+tela_game_over12 : string "   #   #  #   # #     # #               "
+tela_game_over13 : string "   #####  #   # #     # #####           "
+tela_game_over14 : string "                                        "
+tela_game_over15 : string "          ##### #   # ##### #####       "
+tela_game_over16 : string "          #   # #   # #     #    #      "
+tela_game_over17 : string "          #   # #   # #     #    #      "
+tela_game_over18 : string "          #   # #   # ##### #####       "
+tela_game_over19 : string "          #   # #   # #     # #         "
+tela_game_over20 : string "          #   #  # #  #     #  #        "
+tela_game_over21 : string "          #####   #   ##### #   #       "
+tela_game_over22 : string "                                        "
+tela_game_over23 : string "                                        "
+tela_game_over24 : string "                                        "
+tela_game_over25 : string "                                        "
+tela_game_over26 : string "                                        "
+tela_game_over27 : string " Pressione ESPACO para jogar novamente  "
+tela_game_over28 : string "                                        "
+tela_game_over29 : string "                                        "
+
 
 
 
