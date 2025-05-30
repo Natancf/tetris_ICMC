@@ -58,9 +58,9 @@ MAIN LOOP
                     - [x] atualiza posição
                     - [x] apaga peca
                     - [x] desenha peca
-	- [ ] verifica se completa linha
-		- [ ] se True move tudo que esta acima para baixo
-			- [ ] pontuacao++
+	- [x] verifica se completa linha
+		- [x] se True move tudo que esta acima para baixo
+			- [x] pontuacao++
 	- [ ] spawn peca
 	- [ ] verificar se perdeu
 

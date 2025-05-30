@@ -40,7 +40,6 @@ t_delay   : var #1
 static t_delay, #60000
 static c_delay, #60000
 
-
 ;variaveis da funcao se_ocupado 
 arg_se_ocupado : var #1 ;posicao
 flag_ocupado   : var #1
@@ -91,6 +90,9 @@ main:
 	call print_string
 
 	call start_game
+
+	loadn r0, #8
+	store t_peca, r0
 
 	call spawn_peca
 
@@ -1218,7 +1220,7 @@ fixa_peca:
 	add r3, r2, r0 ;r3 = &cp_mapa[pos]
 	storei r3, r4 ;cp_mapa[pos] = #
 
-	;salvar pos (quads[0] em last_peca_pos
+	;salvar pos (quads[0]) em last_peca_pos
 	storei r6, r0
 
 	;salvar quads[] em cp_mapa e em last_peca_pos
@@ -1313,6 +1315,7 @@ se_completa_linha:
 	loop_se_completa_linha:
 		;obter last_peca_pos[i]
 			add r2, r0, r1 ;r2 = &last_peca_pos[i]
+			store arg_se_fechou_linha, r2
 			loadi r2, r2 ;r2 = last_peca_pos[i]
 		;verificar se fechou linha
 			store pos_check_line, r2
@@ -1347,22 +1350,137 @@ fechou_linha:
 ;	r2 : posicao da linha fechada
 	push FR
 	push r0
+	push r1
+	push r3
+	push r4
+	push r5
 		;incrementar o score
 			load r0, score
 			inc r0
 			store score, r0
 
-		;elimnar a linha
+		;eliminar a linha
 			store arg_elimina_linha, r2
 			call elimina_linha
-	pop r0
-	pop FR
-	rts
+
+		;atualizar last_peca_pos[i] dos quadradinhos acima da peca eliminada
+			;verifica se a last_peca_pos[0] ja foi eliminada
+			loadn r0, #last_peca_pos
+			loadi r3, r0
+			loadn r1, #0
+			cmp r3, r1
+			jeq last_peca_pos_1
+
+			;verifica se a last_peca_pos[0] e a mesma
+			cmp r2, r3
+			jeq last_peca_pos_1
+
+			;verificar se esta' acima
+			loadn r1, #40
+			div r4, r3, r1 ;last_peca_pos[0]
+			div r5, r2, r1 
+			cmp r4, r5
+			jgr last_peca_pos_1 ;caso last_peca_pos[0] estiver abaixo, nao atualizar
+
+			;caso nao ja tenha sido eliminada e nem e' o mesmo quadradinho, atualizar
+			loadn r1, #40
+			add r1, r3, r1 ;descer
+			storei r0, r1 
+
+			last_peca_pos_1:
+			;verifica se a last_peca_pos[1] ja foi eliminada
+			inc r0
+			loadi r3, r0
+			loadn r1, #0
+			cmp r3, r1
+			jeq last_peca_pos_2
+
+			;verifica se a last_peca_pos[1] e' a mesma
+			cmp r2, r3
+			jeq last_peca_pos_2
+
+			;verificar se esta' acima
+			loadn r1, #40
+			div r4, r3, r1 ;last_peca_pos[1]
+			div r5, r2, r1 
+			cmp r4, r5
+			jgr last_peca_pos_2 ;caso last_peca_pos[1] estiver abaixo, nao atualizar
+
+			;caso nao ja tenha sido eliminada e nem e' o mesmo quadradinho, atualizar
+			loadn r1, #40
+			add r1, r3, r1 ;descer
+			storei r0, r1
+
+			last_peca_pos_2:
+			;verifica se a last_peca_pos[2] ja foi eliminada
+			inc r0
+			loadi r3, r0
+			loadn r1, #0
+			cmp r3, r1
+			jeq last_peca_pos_3
+
+			;verifica se a last_peca_pos[2] e' a mesma
+			cmp r2, r3
+			jeq last_peca_pos_3
+
+			;verificar se esta' acima
+			loadn r1, #40
+			div r4, r3, r1 ;last_peca_pos[2]
+			div r5, r2, r1 
+			cmp r4, r5
+			jgr last_peca_pos_3 ;caso last_peca_pos[2] estiver abaixo, nao atualizar
+
+			;caso nao ja tenha sido eliminada e nem e' o mesmo quadradinho, atualizar
+			loadn r1, #40
+			add r1, r3, r1 ;descer
+			storei r0, r1			
+			
+			last_peca_pos_3:
+			;verifica se a last_peca_pos[3] ja foi eliminada
+			inc r0
+			loadi r3, r0
+			loadn r1, #0
+			cmp r3, r1
+			jeq end_fechou_linha
+
+			;verifica se a last_peca_pos[3] e' a mesma
+			cmp r2, r3
+			jeq end_fechou_linha
+
+			;verificar se esta' acima
+			loadn r1, #40
+			div r4, r3, r1 ;last_peca_pos[3]
+			div r5, r2, r1 
+			cmp r4, r5
+			jgr end_fechou_linha ;caso last_peca_pos[3] estiver abaixo, nao atualizar
+
+			;caso nao ja tenha sido eliminada e nem e' o mesmo quadradinho, atualizar
+			loadn r1, #40
+			add r1, r3, r1 ;descer
+			storei r0, r1
+
+	end_fechou_linha:
+		;atualizar que a last_peca_pos atual foi eliminada
+		loadn r0, #0
+		load r1, arg_se_fechou_linha
+		storei r1, r0			
+
+		pop r5
+		pop r4
+		pop r3
+		pop r1
+		pop r0
+		pop FR
+		rts
+
+arg_se_fechou_linha : var #1
 
 ;--------------------------------------------------
 ;END se_completa_linha
 ;--------------------------------------------------
 
+teste : var #1
+static teste, #0
 
 ;--------------------------------------------------
 ;check_line
@@ -1422,7 +1540,7 @@ check_line:
 
 	;caso nao tenha nenhum espaco vazio na linha
 		loadn r0, #1
-		store flag_check_line, r0		
+		store flag_check_line, r0
 
 	end_check_line:
 		pop r5
@@ -1470,15 +1588,14 @@ elimina_linha:
 		dec r2
 		jnz loop_mult_elimina_linha
 	
-	add r0, r0, r1 ;r0 = posicao inicial da linha acima da linha eliminada
+	sub r0, r0, r1 ;r0 = posicao inicial da linha acima da linha eliminada
 	
 	;descer todas as linhas acima da linha eliminada
 	loadn r2, #160 ;condicao de parada
 
 	;se a linha eliminada for a primeira, nao descer a linha de cima
-		cmp r1, r2
+		cmp r0, r2
 		jeq eliminada_primeira_linha
-
 
 	loop_elimina_linha:
 		store arg_desce_linha, r0
@@ -2841,10 +2958,10 @@ mapa17 : string "               $$$$$$$$$$               "
 mapa18 : string "               $$$$$$$$$$               "
 mapa19 : string "               $$$$$$$$$$               "
 mapa20 : string "               $$$$$$$$$$               "
-mapa21 : string "               $$$$$$$$$$               "
-mapa22 : string "               $$$$$$$$$$               "
-mapa23 : string "               $$$$$$$$$$               "
-mapa24 : string "               $$$$$$$$$$               "
+mapa21 : string "               $#########               "
+mapa22 : string "               $#########               "
+mapa23 : string "               $#########               "
+mapa24 : string "               $#########               "
 mapa25 : string "                                        "
 mapa26 : string "                                        "
 mapa27 : string "                                        "
@@ -2873,10 +2990,10 @@ cp_mapa17 : string "              #$$$$$$$$$$#             "
 cp_mapa18 : string "              #$$$$$$$$$$#             "
 cp_mapa19 : string "              #$$$$$$$$$$#             "
 cp_mapa20 : string "              #$$$$$$$$$$#             "
-cp_mapa21 : string "              #$$$$$$$$$$#             "
-cp_mapa22 : string "              #$$$$$$$$$$#             "
-cp_mapa23 : string "              #$$$$$$$$$$#             "
-cp_mapa24 : string "              #$$$$$$$$$$#             "
+cp_mapa21 : string "              #$##########             "
+cp_mapa22 : string "              #$##########             "
+cp_mapa23 : string "              #$##########             "
+cp_mapa24 : string "              #$##########             "
 cp_mapa25 : string "              ############             "
 cp_mapa26 : string "                                       "
 cp_mapa27 : string "                                       "
