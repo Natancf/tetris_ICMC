@@ -62,8 +62,9 @@ MAIN LOOP
 		- [x] se True move tudo que esta acima para baixo
 			- [x] pontuacao++
 	- [x] spawn peca
-	- [ ] verificar se perdeu
-        - [ ] tela de game over
+	- [x] verificar se perdeu
+        - [x] resetar mapa
+        - [x] tela de game over
         - [ ] apresentar a pontuação
-        - [ ] jogar novamente
+        - [x] jogar novamente
 

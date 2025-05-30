@@ -264,6 +264,7 @@ spawn_peca:
 	push r1
 	push r2
 	push r3
+	push r4
 
 	;verificar flag_spawn
 	load r0, flag_spawn
@@ -283,6 +284,7 @@ spawn_peca:
 			cmp r0, r1
 			jne spawn_Linv
 
+
 			;verificar se e possivel spawn
 				;Forma da peca no spawn
 				;	    3
@@ -296,13 +298,14 @@ spawn_peca:
 			
 				;verificar se 220 esta' ocupado
 				loadn r2, #220
-				add r2, r1, r2 ;r2 aponta para mapa[220]					
-				loadi r2, r2 ;r2 armazena mapa[220]
-				cmp r2, r3 ;verificar se 220 esta ocupado
-				jeq game_over ;caso esteja
+				add r1, r1, r2
+				loadi r2, r1
+				cmp r2, r3
+				jeq game_over 
 
 				;verificar se 258 esta ocupado
 				loadn r2, #258
+				loadn r1, #cp_mapa0
 				add r1, r1, r2 ;r1 aponta para mapa[258]
 				loadi r2, r1 ;r2 armazena mapa[258]
 				cmp r2, r3 ;verificar se 258 esta ocupado
@@ -358,7 +361,7 @@ spawn_peca:
 				jeq game_over
 	
 				;verificar se 260 esta' ocupado
-				inc r2 ;r2 aponta para mapa[260]
+				inc r1 ;r2 aponta para mapa[260]
 				loadi r2, r1 ;r2 armazena mapa[260]
 				cmp r2, r3 ;verifica se 260 esta' ocupado
 				jeq game_over
@@ -603,6 +606,7 @@ spawn_peca:
 	game_over:
 		loadn r1, #1
 		store flag_perdeu, r1
+		
 		jmp end_spawn_peca
 
 	spawna_peca:
@@ -611,6 +615,7 @@ spawn_peca:
 		store flag_spawn, r1	
 
 	end_spawn_peca:
+	pop r4
 	pop r3
 	pop r2
 	pop r1	
@@ -1729,18 +1734,34 @@ se_perdeu:
                            
 	;verificar se a pessoa perdeu
 		loadn r1, #1
+		load r0, flag_perdeu
 		cmp r0, r1
 		jne end_se_perdeu
-		
+
+	
 	;caso tenha perdido
+		;resetar cp_mapa
+		call reset_map	
+
+		;jogar novamente
 		call draw_game_over
-		inchar r0
 		loadn r1, #' '		
 
 		wait_spacebar_game_over:
+			inchar r0
 			cmp r0, r1
 			jne wait_spacebar_game_over
-		
+			
+
+		;reset da flag_perdeu
+		loadn r0, #0
+		store flag_perdeu, r0
+	
+		pop r3
+		pop r2
+		pop r1
+		pop r0
+		pop FR
 		jmp retry
 
 	end_se_perdeu:
@@ -1754,6 +1775,57 @@ se_perdeu:
 ;--------------------------------------------------
 ;END se_perdeu
 ;--------------------------------------------------
+
+;--------------------------------------------------
+;reset_map
+;--------------------------------------------------
+reset_map:
+	push FR
+	push r0
+	push r1
+	push r2
+	push r3
+	push r4
+	push r5
+	push r6
+	push r7
+
+	loadn r0, #cp_mapa0
+	loadn r2, #25 ;fim de cada linha
+	loadn r3, #200 ;linha inicial do mapa
+	loadn r4, #1000 ;linha final do mapa
+	loadn r5, #40
+	loadn r6, #'$'
+
+
+	loop1_reset_map:
+		loadn r1, #15
+		loop2_reset_map:
+			add r7, r0, r3 ;r7 = &cp_mapa[linha i]
+			add r7, r7, r1 ;r7 = &cp_mapa[linha i + coluna j]
+			storei r7, r6 ;limpa o quadradinho
+			inc r1
+			cmp r1, r2
+			jne loop2_reset_map
+		add r3, r3, r5 ;ir para a proxima linha
+		cmp r3, r4
+		jne loop1_reset_map
+	
+	pop r7
+	pop r6
+	pop r5
+	pop r4
+	pop r3
+	pop r2
+	pop r1
+	pop r0
+	pop FR
+	rts 
+
+;--------------------------------------------------
+;END reset_map
+;--------------------------------------------------
+
 
 ;--------------------------------------------------
 ;draw_game_over
@@ -3109,7 +3181,7 @@ tela_game_over17 : string "          #   # #   # #     #    #      "
 tela_game_over18 : string "          #   # #   # ##### #####       "
 tela_game_over19 : string "          #   # #   # #     # #         "
 tela_game_over20 : string "          #   #  # #  #     #  #        "
-tela_game_over21 : string "          #####   #   ##### #   #       "
+tela_game_over21 : string "          #####   #   ##### #   ##      "
 tela_game_over22 : string "                                        "
 tela_game_over23 : string "                                        "
 tela_game_over24 : string "                                        "
