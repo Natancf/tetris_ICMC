@@ -68,6 +68,12 @@ pos_check_line  : var #1
 flag_check_line : var #1
 static pos_check_line, #0
 
+;argumento da funcao elimina_linha
+arg_elimina_linha : var #1
+
+;argumento da funcao desce_linha
+arg_desce_linha : var #1
+
 
 main:
 	;Impressao da mensagem inicial
@@ -1285,10 +1291,24 @@ fixa_peca:
 ;--------------------------------------------------
 
 ;--------------------------------------------------
-;
+;se_completa_linha
 ;--------------------------------------------------
+se_completa_linha:
+	push FR
+	push r0
+	push r1
+
+	
 
 
+	pop r1
+	pop r0
+	pop FR
+	rts
+
+;--------------------------------------------------
+;END se_completa_linha
+;--------------------------------------------------
 
 
 ;--------------------------------------------------
@@ -1368,6 +1388,103 @@ check_line:
 
 ;--------------------------------------------------
 ;END check_line
+;--------------------------------------------------
+
+;--------------------------------------------------
+;elimina_linha
+;--------------------------------------------------
+;parametros
+;	arg_elimina_linha : posicao qualquer da linha a ser eliminada
+
+elimina_linha:
+	push FR
+	push r0
+	push r1
+
+	;descer todas as linhas acima
+	
+
+
+
+
+	pop r1
+	pop r0
+	pop FR
+	rts
+;--------------------------------------------------
+;END elimina_linha
+;--------------------------------------------------
+
+
+;--------------------------------------------------
+;desce_linha
+;--------------------------------------------------
+;parametros
+;	arg_desce_linha : posicao inicial da linha
+
+desce_linha:
+	push FR
+	push r0
+	push r1
+	push r2
+	push r3
+	push r4
+	push r5
+	push r6
+	push r7
+
+	load r0, arg_desce_linha	
+	loadn r1, #cp_mapa0
+	add r0, r1, r0 ;r0 = &cp_mapa[posicao inicial da linha]
+	
+	loadn r1, #40
+	add r1, r0, r1 ;r1 = &cp_mapa[posicao inicial da linha de baixo]	
+
+	;copiar tudo que esta na linha atual para a linha de baixo
+		loadn r2, #15 ;ponto inicial do loop
+		loadn r3, #25 ;ponto final do loop
+
+		load r6, arg_desce_linha
+		loadn r7, #40
+		add r6, r6, r7 ;r6 = pos inicial da linha de baixo  
+
+		desce_linha_loop:
+			add r4, r0, r2 ;r4 = &cp_mapa[posicao i da linha atual]
+			loadi r4, r4 ;r4 = cp_mapa[posicao i da linha atual]
+			add r5, r1, r2 ;r4 = &cp_mapa[posicao i da linha de baixo]
+			storei r5, r4 ;cp_mapa[posicao i da linha de baixo] = cp_mapa[posicao i da linha atual]		
+			add r7, r6, r2 ;r7 = pos i da linha de baixo
+			outchar r4, r7
+			inc r2
+			cmp r2, r3
+			jne desce_linha_loop
+
+	;apagar a linha de que foi descida
+		loadn r7, #'$'
+		loadn r2, #15 ;reset r2	
+		;manter r3
+		load r6, arg_desce_linha ;r6 = posicao inicial da linha antiga
+		apaga_linha_desce_loop:
+			add r4, r0, r2 ;r4 = &cp_mapa[posicao i antiga da linha]
+			storei r4, r7
+			add r5, r6, r2 ;r5 = posicao i antiga da linha
+			outchar r7, r5
+			inc r2
+			cmp r2, r3
+			jne apaga_linha_desce_loop
+
+	pop r7	
+	pop r6
+	pop r5
+	pop r4
+	pop r3
+	pop r2
+	pop r1
+	pop r0
+	pop FR
+	rts
+;--------------------------------------------------
+;END desce_linha
 ;--------------------------------------------------
 
 ;--------------------------------------------------
@@ -2657,6 +2774,10 @@ cp_mapa29 : string "                                       "
 ;OBS: cp_mapa tem uma coluna a menos do que mapa, pois esse ultimo espaco de cada string
 ;e' reservado para \0, entao para ficar mais facil mexer na copia do mapa, apagou-se a ultima coluna
 ;pois ela e' irrelevante em cp_mapa
+
+;linha vazia
+linha_vazia : string "              #$$$$$$$$$$#             "
+
 
 
 ;vetor randomico (contem valores aleatorios de 0 a 6)
