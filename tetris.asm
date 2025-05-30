@@ -74,6 +74,9 @@ arg_elimina_linha : var #1
 ;argumento da funcao desce_linha
 arg_desce_linha : var #1
 
+;pontuacao
+score : var #1
+static score, #0
 
 main:
 	;Impressao da mensagem inicial
@@ -89,17 +92,12 @@ main:
 
 	call start_game
 
-	;call check_line
-	;load r0, flag_check_line
-	;loadn r1, #'A'
-	;outchar r1, r0
-
-
 	call spawn_peca
 
 	main_loop:
 		call mv_peca
 		call down_peca
+		call se_completa_linha
 		call spawn_peca
 		jmp main_loop
 	halt
@@ -1297,11 +1295,66 @@ se_completa_linha:
 	push FR
 	push r0
 	push r1
+	push r2
+	push r3
+	push r4
+
+	;flag_spawn e' setada para 1 apos uma peca ser fixada, entao verificar apos isso
+	load r0, flag_spawn 
+	loadn r1, #0
+	cmp r0, r1
+	jeq end_se_completa_linha 
+	
+	loadn r0, #last_peca_pos
+
+	;eliminar se completar as linhas da ultima peca colocada
+	loadn r1, #3
+	loadn r3, #1 ;para comparar flag
+	loop_se_completa_linha:
+		;obter last_peca_pos[i]
+			add r2, r0, r1 ;r2 = &last_peca_pos[i]
+			loadi r2, r2 ;r2 = last_peca_pos[i]
+		;verificar se fechou linha
+			store pos_check_line, r2
+			call check_line
+			load r4, flag_check_line
+			cmp r4, r3
+			ceq fechou_linha ;caso fechou linha
+		;decrementar o contador/indexador
+			dec r1
+			jnz loop_se_completa_linha
 
 	
+	;verificar se a linha de last_peca_pos[0] foi fechada e eliminar
+		loadi r2, r0 ;r2 = last_peca_pos[0]
+		store pos_check_line, r2
+		call check_line
+		load r4, flag_check_line
+		cmp r4, r3
+		ceq fechou_linha
 
+	end_se_completa_linha:
+		pop r4
+		pop r3
+		pop r2
+		pop r1
+		pop r0
+		pop FR
+		rts
 
-	pop r1
+fechou_linha:
+;argumentos
+;	r2 : posicao da linha fechada
+	push FR
+	push r0
+		;incrementar o score
+			load r0, score
+			inc r0
+			store score, r0
+
+		;elimnar a linha
+			store arg_elimina_linha, r2
+			call elimina_linha
 	pop r0
 	pop FR
 	rts
@@ -1353,6 +1406,7 @@ check_line:
 
 	loadn r4, #15
 	loadn r5, #25 ;condicao de parada do loop	
+	
 
 	loop_check_line:
 		;obter a posicao de cada quadradinho da linha
@@ -1400,13 +1454,32 @@ elimina_linha:
 	push FR
 	push r0
 	push r1
+	push r2
 
-	;descer todas as linhas acima
+	load r0, arg_elimina_linha
+	loadn r1, #40
+	div r2, r0, r1 ;r2 = numero da linha
+	loadn r0, #0
+
+	;r0 = posicao inicial da linha a ser eliminada
+	loop_mult_elimina_linha:
+		add r0, r0, r1
+		dec r2
+		jnz loop_mult_elimina_linha
 	
+	add r0, r0, r1 ;r0 = posicao inicial da linha acima da linha eliminada
 
+	;descer todas as linhas acima da linha eliminada
+	loadn r2, #160 ;condicao de parada
 
+	loop_elimina_linha:
+		store arg_desce_linha, r0
+		call desce_linha
+		sub r0, r0, r1 ;r0 -= 40, para ir para a proxima linha
+		cmp r0, r2
+		jne loop_elimina_linha
 
-
+	pop r2
 	pop r1
 	pop r0
 	pop FR
@@ -1421,7 +1494,6 @@ elimina_linha:
 ;--------------------------------------------------
 ;parametros
 ;	arg_desce_linha : posicao inicial da linha
-
 desce_linha:
 	push FR
 	push r0
