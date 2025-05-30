@@ -1361,10 +1361,6 @@ fechou_linha:
 	push r3
 	push r4
 	push r5
-		;incrementar o score
-			load r0, score
-			inc r0
-			store score, r0
 
 		;eliminar a linha
 			store arg_elimina_linha, r2
@@ -1486,9 +1482,6 @@ arg_se_fechou_linha : var #1
 ;END se_completa_linha
 ;--------------------------------------------------
 
-teste : var #1
-static teste, #0
-
 ;--------------------------------------------------
 ;check_line
 ;--------------------------------------------------
@@ -1584,6 +1577,11 @@ elimina_linha:
 	push r4
 	push r5
 
+	;incrementar score
+	load r0, score
+	inc r0
+	store score, r0
+
 	load r0, arg_elimina_linha
 	loadn r1, #40
 	div r2, r0, r1 ;r2 = numero da linha
@@ -1612,6 +1610,7 @@ elimina_linha:
 		jne loop_elimina_linha
 
 	end_elimina_linha:
+	call reset_fundo
 	pop r5
 	pop r4
 	pop r3
@@ -1651,6 +1650,44 @@ elimina_linha:
 ;END elimina_linha
 ;--------------------------------------------------
 
+;--------------------------------------------------
+;reset_fundo
+;--------------------------------------------------
+reset_fundo:
+	push FR
+	push r0
+	push r1
+	push r2
+	push r3
+	push r4
+	push r5
+
+	loadn r0, #1000
+	loadn r1, #15
+	loadn r2, #25
+	loadn r3, #'#'
+	loadn r4, #cp_mapa0
+	
+	loop_reset_fundo:
+		add r5, r4, r0 ;r5 = &cp_mapa[i]
+		add r5, r5, r1 ;r5 = &cp_mapa[i][j]
+		storei r5, r3 ;cp_mapa[i][j] = #
+		inc r1
+		cmp r1, r2
+		jne loop_reset_fundo	
+
+	pop r5
+	pop r4
+	pop r3
+	pop r2
+	pop r1
+	pop r0
+	pop FR
+	rts
+
+;--------------------------------------------------
+;END reset_fundo
+;--------------------------------------------------
 
 ;--------------------------------------------------
 ;desce_linha
