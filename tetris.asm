@@ -91,9 +91,6 @@ main:
 
 	call start_game
 
-	loadn r0, #8
-	store t_peca, r0
-
 	call spawn_peca
 
 	main_loop:
@@ -2958,10 +2955,10 @@ mapa17 : string "               $$$$$$$$$$               "
 mapa18 : string "               $$$$$$$$$$               "
 mapa19 : string "               $$$$$$$$$$               "
 mapa20 : string "               $$$$$$$$$$               "
-mapa21 : string "               $#########               "
-mapa22 : string "               $#########               "
-mapa23 : string "               $#########               "
-mapa24 : string "               $#########               "
+mapa21 : string "               $$$$$$$$$$               "
+mapa22 : string "               $$$$$$$$$$               "
+mapa23 : string "               $$$$$$$$$$               "
+mapa24 : string "               $$$$$$$$$$               "
 mapa25 : string "                                        "
 mapa26 : string "                                        "
 mapa27 : string "                                        "
@@ -2990,10 +2987,10 @@ cp_mapa17 : string "              #$$$$$$$$$$#             "
 cp_mapa18 : string "              #$$$$$$$$$$#             "
 cp_mapa19 : string "              #$$$$$$$$$$#             "
 cp_mapa20 : string "              #$$$$$$$$$$#             "
-cp_mapa21 : string "              #$##########             "
-cp_mapa22 : string "              #$##########             "
-cp_mapa23 : string "              #$##########             "
-cp_mapa24 : string "              #$##########             "
+cp_mapa21 : string "              #$$$$$$$$$$#             "
+cp_mapa22 : string "              #$$$$$$$$$$#             "
+cp_mapa23 : string "              #$$$$$$$$$$#             "
+cp_mapa24 : string "              #$$$$$$$$$$#             "
 cp_mapa25 : string "              ############             "
 cp_mapa26 : string "                                       "
 cp_mapa27 : string "                                       "
