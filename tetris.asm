@@ -1455,6 +1455,9 @@ elimina_linha:
 	push r0
 	push r1
 	push r2
+	push r3
+	push r4
+	push r5
 
 	load r0, arg_elimina_linha
 	loadn r1, #40
@@ -1468,9 +1471,14 @@ elimina_linha:
 		jnz loop_mult_elimina_linha
 	
 	add r0, r0, r1 ;r0 = posicao inicial da linha acima da linha eliminada
-
+	
 	;descer todas as linhas acima da linha eliminada
 	loadn r2, #160 ;condicao de parada
+
+	;se a linha eliminada for a primeira, nao descer a linha de cima
+		cmp r1, r2
+		jeq eliminada_primeira_linha
+
 
 	loop_elimina_linha:
 		store arg_desce_linha, r0
@@ -1479,11 +1487,42 @@ elimina_linha:
 		cmp r0, r2
 		jne loop_elimina_linha
 
+	end_elimina_linha:
+	pop r5
+	pop r4
+	pop r3
 	pop r2
 	pop r1
 	pop r0
 	pop FR
 	rts
+
+	eliminada_primeira_linha:
+		;limpar a primeira linha
+		loadn r0, #'$'
+		loadn r1, #cp_mapa5
+		loadn r2, #15
+		loadn r3, #25
+		loadn r5, #200
+
+		loop_elimina_primeira_linha:
+			;atualizar cp_mapa
+			add r4, r1, r2 ;r4 = &cp_mapa[i]
+			loadn r0, #'$'
+			storei r4, r0
+			
+			;atualizar tela
+			add r4, r5, r2
+			outchar r0, r4
+			
+			inc r2
+			cmp r2, r3
+			jne loop_elimina_primeira_linha
+		
+		jmp end_elimina_linha
+
+
+
 ;--------------------------------------------------
 ;END elimina_linha
 ;--------------------------------------------------
