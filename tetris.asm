@@ -3,7 +3,6 @@ jmp main
 ;posicoes-------------------------------------------------------------
 pos            : var #1
 pos_ant        : var #1
-pos_calc_quads : var #1 ;parametro da funcao calc_quads
 ;posicoes dos outros quadradinhos
 quads : var #4 ;o primeiro elemento do vetor esta inutilizado, mas manter, pois caso contrario
 ;calc_quads nao funciona
@@ -64,6 +63,11 @@ t_delay_fixa : var #1
 static delay_fixa, #2
 static t_delay_fixa, #2
 
+;argumentos da funcao check_line
+pos_check_line  : var #1
+flag_check_line : var #1
+static pos_check_line, #0
+
 
 main:
 	;Impressao da mensagem inicial
@@ -78,6 +82,12 @@ main:
 	call print_string
 
 	call start_game
+
+	;call check_line
+	;load r0, flag_check_line
+	;loadn r1, #'A'
+	;outchar r1, r0
+
 
 	call spawn_peca
 
@@ -635,6 +645,9 @@ mv_peca:
 		pop r1
 		pop r0
 		pop FR	
+		rts
+
+
 
 ;--------------------------------------------------
 ;END mv_peca
@@ -793,6 +806,8 @@ mv_dir:
 	push r6 ;quads
 	push r7
 
+	call calc_quads
+	
 	load r0, pos
 	load r1, t_peca
 	loadn r2, #40
@@ -875,6 +890,8 @@ rotate:
 	push r5 ;cp_mapa
  	push r6 ;auxiliar 
 	push r7	;auxiliar
+
+	call calc_quads
 
 	load r0, pos
 	load r1, t_peca
@@ -1235,7 +1252,7 @@ fixa_peca:
 	
 	;atualizar t_peca
 	;r7 = &rand[0], r7 permanece apontando para rand
-	add r7, r7, r3 ;r7 = &rand[rand_ant + 1 ou 0(reset)]
+	add r7, r7, r3 ;r7 = &rand[rand + 1 ou 0(reset)]
 	loadi r7, r7 ;r7 = rand[rand_ant + 1 ou 0(reset)] 
 	store t_peca, r7 ;atualiza t_peca
 
@@ -1265,6 +1282,92 @@ fixa_peca:
 
 ;--------------------------------------------------
 ;END fixa_peca
+;--------------------------------------------------
+
+;--------------------------------------------------
+;
+;--------------------------------------------------
+
+
+
+
+;--------------------------------------------------
+;check_line
+;--------------------------------------------------
+;checa se a linha de uma posicao especifica esta' completa
+;argumentos:
+;	pos_check_line : posicao qualquer da linha a ser verificada
+;retorno:
+;	flag_check_line : 0, se nao completa, 1 se completa
+
+check_line:
+	push FR
+	push r0
+	push r1
+	push r2
+	push r3
+	push r4
+	push r5
+
+	;obter a posicao inicial da linha
+	load r0, pos_check_line
+	loadn r1, #40
+	div r0, r0, r1
+
+	loadn r2, #0
+
+	;caso pos esteja na linha 0
+	cmp r0, r2
+	jeq skip_loop_mult_check_line	
+
+	;caso nao esteja
+	loop_mult_check_line: ;r2 = n_linha * 40
+		add r2, r2, r1
+		dec r0
+		jnz loop_mult_check_line
+
+	skip_loop_mult_check_line:
+	
+	;checar a se a linha toda esta' ocupada
+	loadn r3, #0 ;para verificar flag_ocupado
+
+	loadn r4, #15
+	loadn r5, #25 ;condicao de parada do loop	
+
+	loop_check_line:
+		;obter a posicao de cada quadradinho da linha
+		add r0, r2, r4 ;r0 = pos inicial da linha + {15, ..., 24}
+		store arg_se_ocupado, r0
+		call se_ocupado
+		load r0, flag_ocupado
+		cmp r0, r3
+		jeq set_flag_check_line_0 ;caso haja um quadradinho nao ocupado
+		inc r4
+		cmp r4, r5
+		jne loop_check_line	
+
+	;caso nao tenha nenhum espaco vazio na linha
+		loadn r0, #1
+		store flag_check_line, r0		
+
+	end_check_line:
+		pop r5
+		pop r4
+		pop r3
+		pop r2
+		pop r1
+		pop r0
+		pop FR
+		rts
+
+	set_flag_check_line_0:
+		loadn r0, #0
+		store flag_check_line, r0
+		jmp end_check_line
+		
+
+;--------------------------------------------------
+;END check_line
 ;--------------------------------------------------
 
 ;--------------------------------------------------
@@ -1561,7 +1664,7 @@ calc_quads:
 			inc r2
 			storei r2, r1
 
-		jmp fim_calc_quads
+			jmp fim_calc_quads
 
 	;FIM Peca S---------------------------------------------------
 
@@ -1682,8 +1785,7 @@ calc_quads:
 			inc r2
 			storei r2, r1	
 
-
-		jmp fim_calc_quads
+			jmp fim_calc_quads
 	;FIM Peca Z---------------------------------------------------
 
 
@@ -1721,7 +1823,7 @@ calc_quads:
 
 		jmp fim_calc_quads
 
-		rot_T_1:
+	rot_T_1:
 		loadn r1, #12
 		cmp r1, r7 ;r7 == 12?
 		jne rot_T_2 ;caso falso
@@ -1752,7 +1854,7 @@ calc_quads:
 
 		jmp fim_calc_quads
 
-		rot_T_2:
+	rot_T_2:
 		loadn r1, #13
 		cmp r1, r7 ;r7 == 13?
 		jne rot_T_3 ;caso falso
@@ -1783,7 +1885,7 @@ calc_quads:
 
 		jmp fim_calc_quads
 
-		rot_T_3:
+	rot_T_3:
 		;B = A + 40
 		mov r1, r0
 		add r1, r1, r3
@@ -2116,7 +2218,6 @@ calc_quads:
 		add r1, r1, r3
 		inc r2
 		storei r2, r1
-		
 
 		;C = A + 1 + 40 - 1
 		dec r1
