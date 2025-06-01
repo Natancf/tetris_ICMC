@@ -59,8 +59,11 @@ MAIN LOOP
                     - [x] apaga peca
                     - [x] desenha peca
 	- [x] verifica se completa linha
-		- [x] se True move tudo que esta acima para baixo
-			- [x] pontuacao++
+        - [ ] verificar se a linha da posicao de cada quadradinho da peca foi movida para baixo
+		    - [x] caso a linha tenha sido completa
+                - [ ] mover todas as linhas para baixo
+                    - [ ] atualizar também last_peca_pos
+			    - [x] pontuacao++
 	- [x] spawn peca
 	- [x] verificar se perdeu
         - [x] resetar mapa
