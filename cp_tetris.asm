@@ -1432,7 +1432,6 @@ check_line:
 ;--------------------------------------------------
 ;parametros
 ;	arg_eliminar_linha : posicao qualquer da linha a ser eliminada
-
 eliminar_linha:
 	push FR
 	push r0 ;posicao inicial da linha a ser eliminada
@@ -1489,7 +1488,7 @@ eliminar_linha:
 				jne loop_eliminar_primeira_linha
 
 		linha_acima_nao_fora_do_mapa:
-		call desce_linha
+		call desce_linhas_acima
 
 	
 	pop r5
@@ -1515,8 +1514,6 @@ desce_linhas_acima:
 	push r0 
 	push r1
 	push r2
-	push r3
-	push r4
 
 	loadn r1, #160
 	loadn r2, #40	
@@ -1527,8 +1524,6 @@ desce_linhas_acima:
 		cmp r0, r1
 		jne desce_linhas_acima_loop		
 
-	pop r4
-	pop r3
 	pop r2
 	pop r1
 	pop r0
