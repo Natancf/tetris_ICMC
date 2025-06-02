@@ -28,7 +28,7 @@ static flag_spawn, #1 ;inicializacao
 rand_index : var #1
 
 ;mensagem inicial----------------------------------------------------
-msg_inicial : string "     Pressione ESPACO para INICIAR.     "                                        
+msg_inicial : string "     PRESSIONE ESPACO PARA INICIAR.     "                                        
 apaga_msg   : string "                                        "
 
 ;se perdeu
@@ -1726,7 +1726,7 @@ se_perdeu:
 
 		;tela de game over
 		call draw_game_over
-		loadn r0, #981
+		loadn r0, #983
 		load r1, score
 		call Imprime_Numero
 		
@@ -3204,24 +3204,24 @@ tela_game_over3  : string "                                        "
 tela_game_over4  : string "                                        "
 tela_game_over5  : string "                                        "
 tela_game_over6  : string "                                        "
-tela_game_over7  : string "   #####  ##### ##   ## #####           "
-tela_game_over8  : string "   #      #   # # # # # #               "
-tela_game_over9  : string "   #      #   # #  #  # #               "
-tela_game_over10 : string "   #  ### ##### #     # #####           "
-tela_game_over11 : string "   #   #  #   # #     # #               "
-tela_game_over12 : string "   #   #  #   # #     # #               "
-tela_game_over13 : string "   #####  #   # #     # #####           "
+tela_game_over7  : string "        ##### ##### ##   ## #####       "
+tela_game_over8  : string "        #     #   # # # # # #           "
+tela_game_over9  : string "        #     #   # #  #  # #           "
+tela_game_over10 : string "        #  ## ##### #     # #####       "
+tela_game_over11 : string "        #   # #   # #     # #           "
+tela_game_over12 : string "        #   # #   # #     # #           "
+tela_game_over13 : string "        ##### #   # #     # #####       "
 tela_game_over14 : string "                                        "
-tela_game_over15 : string "          ##### #   # ##### #####       "
-tela_game_over16 : string "          #   # #   # #     #    #      "
-tela_game_over17 : string "          #   # #   # #     #    #      "
-tela_game_over18 : string "          #   # #   # ##### #####       "
-tela_game_over19 : string "          #   # #   # #     # #         "
-tela_game_over20 : string "          #   #  # #  #     #  #        "
-tela_game_over21 : string "          #####   #   ##### #   ##      "
+tela_game_over15 : string "        ##### #   # ####### #####       "
+tela_game_over16 : string "        #   # #   # #       #    #      "
+tela_game_over17 : string "        #   # #   # #       #    #      "
+tela_game_over18 : string "        #   # #   # ####### #####       "
+tela_game_over19 : string "        #   # #   # #       # #         "
+tela_game_over20 : string "        #   #  # #  #       #  #        "
+tela_game_over21 : string "        #####   #   ####### #   ##      "
 tela_game_over22 : string "                                        "
 tela_game_over23 : string "                                        "
-tela_game_over24 : string "         Pontuacao :                    "
+tela_game_over24 : string "            Pontuacao:                  "
 tela_game_over25 : string "                                        "
 tela_game_over26 : string "                                        "
 tela_game_over27 : string " Pressione ESPACO para jogar novamente  "
