@@ -1300,6 +1300,12 @@ se_completa_linha:
 	push r6
 	push r7
 
+	;verificar se completar linha apos a peca ser fixada (flag_spawn = 1)
+	loadn r0, #1
+	load r1, flag_spawn
+	cmp r0, r1
+	jne end_se_completa_linha 
+
 	;guardar pos em quads[0]
 	load r0, pos
 	store quads, r0
@@ -1319,8 +1325,8 @@ se_completa_linha:
 
 		;verificar se fechou linha
 		load r2, flag_check_line
-		cmp r3, r2
-		jeq continue_se_completa_peca
+		cmp r2, r3
+		jeq continue_se_completa_linha_loop
 
 		;caso fechou linha
 		store arg_eliminar_linha, r4		
@@ -1335,6 +1341,7 @@ se_completa_linha:
 		dec r1 ;decrementa o contador
 		jnz se_completa_linha_loop
 
+	end_se_completa_linha:
 	pop r7
 	pop r6
 	pop r5
@@ -1482,7 +1489,8 @@ eliminar_linha:
 				jne loop_eliminar_primeira_linha
 
 		linha_acima_nao_fora_do_mapa:
-		call desce_linhas_acima
+		call desce_linha
+
 	
 	pop r5
 	pop r4
@@ -1501,8 +1509,41 @@ eliminar_linha:
 ;desce_linhas_acima
 ;--------------------------------------------------
 ;parametros
-;	r0 : posicao inicial da linha acima
+;	r0 : posicao inicial da primeira linha de cima
 desce_linhas_acima:
+	push FR
+	push r0 
+	push r1
+	push r2
+	push r3
+	push r4
+
+	loadn r1, #160
+	loadn r2, #40	
+
+	desce_linhas_acima_loop:
+		call desce_linha
+		sub r0, r0, r2
+		cmp r0, r1
+		jne desce_linhas_acima_loop		
+
+	pop r4
+	pop r3
+	pop r2
+	pop r1
+	pop r0
+	pop FR
+	rts
+;--------------------------------------------------
+;END desce_linhas_acima
+;--------------------------------------------------
+
+;--------------------------------------------------
+;desce_linha
+;--------------------------------------------------
+;parametros
+;	r0 : posicao inicial da linha de cima (linha a ser descida)
+desce_linha:
 	push FR
 	push r0
 	push r1
@@ -1518,22 +1559,45 @@ desce_linhas_acima:
 
 	loadn r1, #cp_mapa0
 	loadn r2, #15
-	loadn r3, #25
 
-	desce_linhas_acima_loop:
+	;linha de cima
+	add r0, r0, r2 ;r0 = i
+	add r4, r1, r0 ;r4 = &cp_mapa[i]
 
+	;linha de baixo
+	loadn r5, #40
+	add r6, r0, r5 ;r6 = j
+	add r5, r4, r5 ;r5 = &cp_mapa[j]
 
-
-		;imprimir na tela a nova linha de baixo
-
-		;atualizar cp_mapa
-	
+	desce_linha_loop:
+		;copiar o conteudo da linha de cima para a linha de baixo				
+			;atualizar cp_mapa
+			loadi r7, r4 ;r7 = cp_mapa[i]
+			storei r5, r7 ;cp_mapa[j] = cp_mapa[i]
+			
+			;atualizar tela	(imprimir nova linha de baixo)
+			outchar r7, r6
 
 		;apagar a linha de cima
-			;imprimir na tela
 			;atualizar cp_mapa
-	
+			loadn r3, #'$'
+			storei r4, r3						
 
+			;atualizar tela	
+			outchar r3, r0
+			
+		;incrementar posicoes
+			inc r0 ;i++
+			inc r4 ;r4 = &cp_mapa[i+1]
+			inc r6 ;j++
+			inc r5 ;r5 = &cp_mapa[j+1]
+
+		;verificar condicao de parada
+			inc r2
+			loadn r3, #25
+			cmp r2, r3
+			jne desce_linha_loop
+	
 	pop r7
 	pop r6
 	pop r5
@@ -1544,14 +1608,9 @@ desce_linhas_acima:
 	pop r0
 	pop FR
 	rts
-
-
 ;--------------------------------------------------
-;END desce_linhas_acima
+;END desce_linha
 ;--------------------------------------------------
-
-
-
 
 ;--------------------------------------------------
 ;atualiza_quads
@@ -1575,7 +1634,6 @@ atualiza_quads:
 	jne nao_eh_pos_atualiza_quads
 	
 	load r0, pos
-	store quads, r0 ;quads[0] = pos 
 	jmp skip_nao_eh_pos_atualiza_quads
 
 	nao_eh_pos_atualiza_quads:
