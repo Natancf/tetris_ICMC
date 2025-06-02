@@ -93,6 +93,11 @@ main:
 
 	call start_game
 
+	;iniciar score
+	loadn r0, #306
+	load r1, score
+	call Imprime_Numero
+
 	call spawn_peca
 
 	main_loop:
@@ -1433,8 +1438,7 @@ check_line:
 ;--------------------------------------------------
 ;END check_line
 ;--------------------------------------------------
-teste : var #1
-static teste, #0
+
 ;--------------------------------------------------
 ;eliminar_linha
 ;--------------------------------------------------
@@ -1450,9 +1454,12 @@ eliminar_linha:
 	push r5
 
 	;atualizar score
-	load r0, score
-	inc r0
-	store score, r0
+		load r1, score
+		inc r1
+		store score, r1
+		
+		loadn r0, #306
+		call Imprime_Numero
 
 	;r0 = posicao inicial da linha a ser eliminada
 		load r0, arg_eliminar_linha
@@ -3137,7 +3144,7 @@ mapa2  : string "                                        "
 mapa3  : string "                                        "
 mapa4  : string "                                        "
 mapa5  : string "               $$$$$$$$$$               "
-mapa6  : string "               $$$$$$$$$$               "
+mapa6  : string "               $$$$$$$$$$ SCORE:        "
 mapa7  : string "               $$$$$$$$$$               "
 mapa8  : string "               $$$$$$$$$$               "
 mapa9  : string "               $$$$$$$$$$               "
