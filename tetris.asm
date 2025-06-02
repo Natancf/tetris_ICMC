@@ -54,9 +54,6 @@ index_mais_esq : var #1
 flag_mais_dir  : var #1
 index_mais_dir : var #1
 
-;posicoes da ultima peca colocada
-last_peca_pos : var #4
-
 ;delay antes de fixar peca
 delay_fixa   : var #1
 t_delay_fixa : var #1
@@ -66,10 +63,9 @@ static t_delay_fixa, #2
 ;argumentos da funcao check_line
 pos_check_line  : var #1
 flag_check_line : var #1
-static pos_check_line, #0
 
-;argumento da funcao elimina_linha
-arg_elimina_linha : var #1
+;argumento da funcao eliminar_linha
+arg_eliminar_linha : var #1
 
 ;argumento da funcao desce_linha
 arg_desce_linha : var #1
@@ -77,6 +73,9 @@ arg_desce_linha : var #1
 ;pontuacao
 score : var #1
 static score, #0
+
+index_atualiza_quads : var #1
+
 
 main:
 	;Impressao da mensagem inicial
@@ -1201,7 +1200,7 @@ fixa_peca:
 	push r3
 	push r4 ;#
 	push r5
-	push r6 ;last_peca_pos
+	push r6
 	push r7
 
 	;delay
@@ -1218,30 +1217,21 @@ fixa_peca:
 	loadn r1, #quads
 	loadn r2, #cp_mapa0
 	loadn r4, #'#'
-	loadn r6, #last_peca_pos
 
-	;atualizar cp_mapa e salvar posicoes em last_peca_pos
+	;atualizar cp_mapa 
 	call calc_quads
 
 	;salvar pos (quads[0]) em cp_mapa
 	add r3, r2, r0 ;r3 = &cp_mapa[pos]
 	storei r3, r4 ;cp_mapa[pos] = #
 
-	;salvar pos (quads[0]) em last_peca_pos
-	storei r6, r0
-
-	;salvar quads[] em cp_mapa e em last_peca_pos
+	;salvar quads[] em cp_mapa
 	loadn r5, #3 ;para interromper o loop e usar como index
 	loop_fixa_peca:
 		add r3, r1, r5 ;r3 = &quads[i]
 		loadi r3, r3 ;r3 = quads[i]
-
-		add r7, r6, r5 ;r7 = &last_peca_pos[i]
-		storei r7, r3 ;last_peca_pos[i] = quads[i]
-
 		add r3, r2, r3 ;r3 = &cp_mapa[quads[i]]
 		storei r3, r4 ;cp_mapa[quads[i]] = #
-		
 		dec r5
 		jnz loop_fixa_peca
 
@@ -1268,7 +1258,6 @@ fixa_peca:
 	add r7, r7, r3 ;r7 = &rand[rand + 1 ou 0(reset)]
 	loadi r7, r7 ;r7 = rand[rand_ant + 1 ou 0(reset)] 
 	store t_peca, r7 ;atualiza t_peca
-
 
 	end_fixa_peca:
 	pop r7
@@ -1307,177 +1296,62 @@ se_completa_linha:
 	push r2
 	push r3
 	push r4
+	push r5
+	push r6
+	push r7
 
-	;flag_spawn e' setada para 1 apos uma peca ser fixada, entao verificar apos isso
-	load r0, flag_spawn 
-	loadn r1, #0
+	;verificar se completar linha apos a peca ser fixada (flag_spawn = 1)
+	loadn r0, #1
+	load r1, flag_spawn
 	cmp r0, r1
-	jeq end_se_completa_linha 
-	
-	loadn r0, #last_peca_pos
+	jne end_se_completa_linha 
 
-	;eliminar se completar as linhas da ultima peca colocada
+	;guardar pos em quads[0]
+	load r0, pos
+	store quads, r0
+
+	;verificar as linhas da ultima peca colocada
+	loadn r0, #quads
 	loadn r1, #3
-	loadn r3, #1 ;para comparar flag
-	loop_se_completa_linha:
-		;obter last_peca_pos[i]
-			add r2, r0, r1 ;r2 = &last_peca_pos[i]
-			store arg_se_fechou_linha, r2
-			loadi r2, r2 ;r2 = last_peca_pos[i]
-		;verificar se fechou linha
-			store pos_check_line, r2
-			call check_line
-			load r4, flag_check_line
-			cmp r4, r3
-			ceq fechou_linha ;caso fechou linha
-		;decrementar o contador/indexador
-			dec r1
-			jnz loop_se_completa_linha
+	add r0, r0, r1 ;r0 = &quads[3]
+	loadn r1, #4 ;condicao de parada do loop
+	loadn r3, #0	
 
-	
-	;verificar se a linha de last_peca_pos[0] foi fechada e eliminar
-		loadi r2, r0 ;r2 = last_peca_pos[0]
-		store pos_check_line, r2
+	se_completa_linha_loop:
+		loadi r4, r0 ;r2 = quads[i]
+
+		store pos_check_line, r4
 		call check_line
-		load r4, flag_check_line
-		cmp r4, r3
-		ceq fechou_linha
+
+		;verificar se fechou linha
+		load r2, flag_check_line
+		cmp r2, r3
+		jeq continue_se_completa_linha_loop
+
+		;caso fechou linha
+		store arg_eliminar_linha, r4		
+		call eliminar_linha
+		dec r1
+		store index_atualiza_quads, r1
+		call atualiza_quads
+		inc r1 		
+
+		continue_se_completa_linha_loop:		
+		dec r0 ;apontar para o proximo quads[i]
+		dec r1 ;decrementa o contador
+		jnz se_completa_linha_loop
 
 	end_se_completa_linha:
-		pop r4
-		pop r3
-		pop r2
-		pop r1
-		pop r0
-		pop FR
-		rts
-
-fechou_linha:
-;argumentos
-;	r2 : posicao da linha fechada
-	push FR
-	push r0
-	push r1
-	push r3
-	push r4
-	push r5
-
-		;eliminar a linha
-			store arg_elimina_linha, r2
-			call elimina_linha
-
-		;atualizar last_peca_pos[i] dos quadradinhos acima da peca eliminada
-			;verifica se a last_peca_pos[0] ja foi eliminada
-			loadn r0, #last_peca_pos
-			loadi r3, r0
-			loadn r1, #0
-			cmp r3, r1
-			jeq last_peca_pos_1
-
-			;verifica se a last_peca_pos[0] e a mesma
-			cmp r2, r3
-			jeq last_peca_pos_1
-
-			;verificar se esta' acima
-			loadn r1, #40
-			div r4, r3, r1 ;last_peca_pos[0]
-			div r5, r2, r1 
-			cmp r4, r5
-			jgr last_peca_pos_1 ;caso last_peca_pos[0] estiver abaixo, nao atualizar
-
-			;caso nao ja tenha sido eliminada e nem e' o mesmo quadradinho, atualizar
-			loadn r1, #40
-			add r1, r3, r1 ;descer
-			storei r0, r1 
-
-			last_peca_pos_1:
-			;verifica se a last_peca_pos[1] ja foi eliminada
-			inc r0
-			loadi r3, r0
-			loadn r1, #0
-			cmp r3, r1
-			jeq last_peca_pos_2
-
-			;verifica se a last_peca_pos[1] e' a mesma
-			cmp r2, r3
-			jeq last_peca_pos_2
-
-			;verificar se esta' acima
-			loadn r1, #40
-			div r4, r3, r1 ;last_peca_pos[1]
-			div r5, r2, r1 
-			cmp r4, r5
-			jgr last_peca_pos_2 ;caso last_peca_pos[1] estiver abaixo, nao atualizar
-
-			;caso nao ja tenha sido eliminada e nem e' o mesmo quadradinho, atualizar
-			loadn r1, #40
-			add r1, r3, r1 ;descer
-			storei r0, r1
-
-			last_peca_pos_2:
-			;verifica se a last_peca_pos[2] ja foi eliminada
-			inc r0
-			loadi r3, r0
-			loadn r1, #0
-			cmp r3, r1
-			jeq last_peca_pos_3
-
-			;verifica se a last_peca_pos[2] e' a mesma
-			cmp r2, r3
-			jeq last_peca_pos_3
-
-			;verificar se esta' acima
-			loadn r1, #40
-			div r4, r3, r1 ;last_peca_pos[2]
-			div r5, r2, r1 
-			cmp r4, r5
-			jgr last_peca_pos_3 ;caso last_peca_pos[2] estiver abaixo, nao atualizar
-
-			;caso nao ja tenha sido eliminada e nem e' o mesmo quadradinho, atualizar
-			loadn r1, #40
-			add r1, r3, r1 ;descer
-			storei r0, r1			
-			
-			last_peca_pos_3:
-			;verifica se a last_peca_pos[3] ja foi eliminada
-			inc r0
-			loadi r3, r0
-			loadn r1, #0
-			cmp r3, r1
-			jeq end_fechou_linha
-
-			;verifica se a last_peca_pos[3] e' a mesma
-			cmp r2, r3
-			jeq end_fechou_linha
-
-			;verificar se esta' acima
-			loadn r1, #40
-			div r4, r3, r1 ;last_peca_pos[3]
-			div r5, r2, r1 
-			cmp r4, r5
-			jgr end_fechou_linha ;caso last_peca_pos[3] estiver abaixo, nao atualizar
-
-			;caso nao ja tenha sido eliminada e nem e' o mesmo quadradinho, atualizar
-			loadn r1, #40
-			add r1, r3, r1 ;descer
-			storei r0, r1
-
-	end_fechou_linha:
-		;atualizar que a last_peca_pos atual foi eliminada
-		loadn r0, #0
-		load r1, arg_se_fechou_linha
-		storei r1, r0			
-
-		pop r5
-		pop r4
-		pop r3
-		pop r1
-		pop r0
-		pop FR
-		rts
-
-arg_se_fechou_linha : var #1
-
+	pop r7
+	pop r6
+	pop r5
+	pop r4
+	pop r3
+	pop r2
+	pop r1
+	pop r0
+	pop FR
+	rts
 ;--------------------------------------------------
 ;END se_completa_linha
 ;--------------------------------------------------
@@ -1500,47 +1374,47 @@ check_line:
 	push r4
 	push r5
 
+	;verificar se o quadradinho ja' foi eliminado
+	loadn r0, #0
+	load r1, pos_check_line
+	cmp r0, r1
+	jeq set_flag_check_line_0
+
 	;obter a posicao inicial da linha
-	load r0, pos_check_line
-	loadn r1, #40
-	div r0, r0, r1
+		load r0, pos_check_line
+		loadn r1, #40
+		div r0, r0, r1
 
-	loadn r2, #0
+		loadn r2, #0
 
-	;caso pos esteja na linha 0
-	cmp r0, r2
-	jeq skip_loop_mult_check_line	
+		loop_mult_check_line: ;r2 = n_linha * 40
+			add r2, r2, r1
+			dec r0
+			jnz loop_mult_check_line
 
-	;caso nao esteja
-	loop_mult_check_line: ;r2 = n_linha * 40
-		add r2, r2, r1
-		dec r0
-		jnz loop_mult_check_line
-
-	skip_loop_mult_check_line:
-	
 	;checar a se a linha toda esta' ocupada
-	loadn r3, #0 ;para verificar flag_ocupado
+		loadn r3, #0 ;para verificar flag_ocupado
+		loadn r4, #15
+		loadn r5, #25 ;condicao de parada do loop	
 
-	loadn r4, #15
-	loadn r5, #25 ;condicao de parada do loop	
-	
-
-	loop_check_line:
-		;obter a posicao de cada quadradinho da linha
-		add r0, r2, r4 ;r0 = pos inicial da linha + {15, ..., 24}
-		store arg_se_ocupado, r0
-		call se_ocupado
-		load r0, flag_ocupado
-		cmp r0, r3
-		jeq set_flag_check_line_0 ;caso haja um quadradinho nao ocupado
-		inc r4
-		cmp r4, r5
-		jne loop_check_line	
+		loop_check_line:
+			;obter a posicao de cada quadradinho da linha
+				add r0, r2, r4 ;r0 = pos inicial da linha + {15, ..., 24}
+			;verificar se esta' ocupado
+				store arg_se_ocupado, r0
+				call se_ocupado
+				load r0, flag_ocupado
+				cmp r0, r3
+				jeq set_flag_check_line_0 ;caso haja um quadradinho nao ocupado
+			;aumentar index e verificar se chegou ao fim do loop
+				inc r4
+				cmp r4, r5
+				jne loop_check_line	
 
 	;caso nao tenha nenhum espaco vazio na linha
 		loadn r0, #1
 		store flag_check_line, r0
+
 
 	end_check_line:
 		pop r5
@@ -1556,61 +1430,75 @@ check_line:
 		loadn r0, #0
 		store flag_check_line, r0
 		jmp end_check_line
-		
-
 ;--------------------------------------------------
 ;END check_line
 ;--------------------------------------------------
-
+teste : var #1
+static teste, #0
 ;--------------------------------------------------
-;elimina_linha
+;eliminar_linha
 ;--------------------------------------------------
 ;parametros
-;	arg_elimina_linha : posicao qualquer da linha a ser eliminada
-
-elimina_linha:
+;	arg_eliminar_linha : posicao qualquer da linha a ser eliminada
+eliminar_linha:
 	push FR
-	push r0
+	push r0 ;posicao inicial da linha a ser eliminada
 	push r1
 	push r2
 	push r3
 	push r4
 	push r5
 
-	;incrementar score
+	;atualizar score
 	load r0, score
 	inc r0
 	store score, r0
 
-	load r0, arg_elimina_linha
-	loadn r1, #40
-	div r2, r0, r1 ;r2 = numero da linha
-	loadn r0, #0
-
 	;r0 = posicao inicial da linha a ser eliminada
-	loop_mult_elimina_linha:
-		add r0, r0, r1
-		dec r2
-		jnz loop_mult_elimina_linha
+		load r0, arg_eliminar_linha
+		loadn r1, #40
+		div r0, r0, r1 ;numero da linha
+		loadn r2, #0	
+
+		mult_eliminar_linha:
+			add r2, r2, r1
+			dec r0
+			jnz mult_eliminar_linha
+
+		mov r0, r2
+
+	;descer todas as linhas de cima
+		sub r0, r0, r1 ;r0 aponta para a posicao inicial da linha acima da linha eliminada
+		
+		;verificar se a linha acima esta' fora do mapa
+			loadn r1, #160
+			cmp r0, r1
+			jne linha_acima_nao_fora_do_mapa
+		
+		;caso a linha acima esteja fora do mapa, apenas apagar a linha a ser eliminada
+			loadn r1, #15
+			loadn r2, #225 ;condicao de parada
+			loadn r3, #'$'
+			loadn r4, #cp_mapa0
+			loadn r5, #200
+			add r1, r1, r5 ;posicao inicial da linha a ser eliminada (215)
+			
+			loop_eliminar_primeira_linha:
+				;imprimir na tela linha vazia
+				outchar r3, r1
+		
+				;atualizar cp_mapa
+				add r5, r4, r1 ;r5 = &cp_mapa5[i]
+				storei r5, r3
+				
+				inc r1
+				cmp r1, r2
+				jne loop_eliminar_primeira_linha
+
+		linha_acima_nao_fora_do_mapa:
+		call desce_linhas_acima
+
 	
-	sub r0, r0, r1 ;r0 = posicao inicial da linha acima da linha eliminada
-	
-	;descer todas as linhas acima da linha eliminada
-	loadn r2, #160 ;condicao de parada
-
-	;se a linha eliminada for a primeira, nao descer a linha de cima
-		cmp r0, r2
-		jeq eliminada_primeira_linha
-
-	loop_elimina_linha:
-		store arg_desce_linha, r0
-		call desce_linha
-		sub r0, r0, r1 ;r0 -= 40, para ir para a proxima linha
-		cmp r0, r2
-		jne loop_elimina_linha
-
-	end_elimina_linha:
-	call reset_fundo
 	pop r5
 	pop r4
 	pop r3
@@ -1620,80 +1508,44 @@ elimina_linha:
 	pop FR
 	rts
 
-	eliminada_primeira_linha:
-		;limpar a primeira linha
-		loadn r0, #'$'
-		loadn r1, #cp_mapa5
-		loadn r2, #15
-		loadn r3, #25
-		loadn r5, #200
-
-		loop_elimina_primeira_linha:
-			;atualizar cp_mapa
-			add r4, r1, r2 ;r4 = &cp_mapa[i]
-			loadn r0, #'$'
-			storei r4, r0
-			
-			;atualizar tela
-			add r4, r5, r2
-			outchar r0, r4
-			
-			inc r2
-			cmp r2, r3
-			jne loop_elimina_primeira_linha
-		
-		jmp end_elimina_linha
-
-
-
 ;--------------------------------------------------
-;END elimina_linha
+;END eliminar_linha
 ;--------------------------------------------------
 
 ;--------------------------------------------------
-;reset_fundo
+;desce_linhas_acima
 ;--------------------------------------------------
-reset_fundo:
+;parametros
+;	r0 : posicao inicial da primeira linha de cima
+desce_linhas_acima:
 	push FR
-	push r0
+	push r0 
 	push r1
 	push r2
-	push r3
-	push r4
-	push r5
 
-	loadn r0, #1000
-	loadn r1, #15
-	loadn r2, #25
-	loadn r3, #'#'
-	loadn r4, #cp_mapa0
-	
-	loop_reset_fundo:
-		add r5, r4, r0 ;r5 = &cp_mapa[i]
-		add r5, r5, r1 ;r5 = &cp_mapa[i][j]
-		storei r5, r3 ;cp_mapa[i][j] = #
-		inc r1
-		cmp r1, r2
-		jne loop_reset_fundo	
+	loadn r1, #160
+	loadn r2, #40	
 
-	pop r5
-	pop r4
-	pop r3
+	desce_linhas_acima_loop:
+		call desce_linha
+		sub r0, r0, r2
+		cmp r0, r1
+		jne desce_linhas_acima_loop		
+
 	pop r2
 	pop r1
 	pop r0
 	pop FR
 	rts
-
 ;--------------------------------------------------
-;END reset_fundo
+;END desce_linhas_acima
 ;--------------------------------------------------
 
 ;--------------------------------------------------
 ;desce_linha
 ;--------------------------------------------------
 ;parametros
-;	arg_desce_linha : posicao inicial da linha
+;	r0 : posicao inicial da linha de cima (linha a ser descida)
 desce_linha:
 	push FR
 	push r0
@@ -1705,47 +1557,51 @@ desce_linha:
 	push r6
 	push r7
 
-	load r0, arg_desce_linha	
+	;linha de cima r0
+	;linha de baixo r0 + 40
+
 	loadn r1, #cp_mapa0
-	add r0, r1, r0 ;r0 = &cp_mapa[posicao inicial da linha]
-	
-	loadn r1, #40
-	add r1, r0, r1 ;r1 = &cp_mapa[posicao inicial da linha de baixo]	
+	loadn r2, #15
 
-	;copiar tudo que esta na linha atual para a linha de baixo
-		loadn r2, #15 ;ponto inicial do loop
-		loadn r3, #25 ;ponto final do loop
+	;linha de cima
+	add r0, r0, r2 ;r0 = i
+	add r4, r1, r0 ;r4 = &cp_mapa[i]
 
-		load r6, arg_desce_linha
-		loadn r7, #40
-		add r6, r6, r7 ;r6 = pos inicial da linha de baixo  
+	;linha de baixo
+	loadn r5, #40
+	add r6, r0, r5 ;r6 = j
+	add r5, r4, r5 ;r5 = &cp_mapa[j]
 
-		desce_linha_loop:
-			add r4, r0, r2 ;r4 = &cp_mapa[posicao i da linha atual]
-			loadi r4, r4 ;r4 = cp_mapa[posicao i da linha atual]
-			add r5, r1, r2 ;r4 = &cp_mapa[posicao i da linha de baixo]
-			storei r5, r4 ;cp_mapa[posicao i da linha de baixo] = cp_mapa[posicao i da linha atual]		
-			add r7, r6, r2 ;r7 = pos i da linha de baixo
-			outchar r4, r7
+	desce_linha_loop:
+		;copiar o conteudo da linha de cima para a linha de baixo				
+			;atualizar cp_mapa
+			loadi r7, r4 ;r7 = cp_mapa[i]
+			storei r5, r7 ;cp_mapa[j] = cp_mapa[i]
+			
+			;atualizar tela	(imprimir nova linha de baixo)
+			outchar r7, r6
+
+		;apagar a linha de cima
+			;atualizar cp_mapa
+			loadn r3, #'$'
+			storei r4, r3						
+
+			;atualizar tela	
+			outchar r3, r0
+			
+		;incrementar posicoes
+			inc r0 ;i++
+			inc r4 ;r4 = &cp_mapa[i+1]
+			inc r6 ;j++
+			inc r5 ;r5 = &cp_mapa[j+1]
+
+		;verificar condicao de parada
 			inc r2
+			loadn r3, #25
 			cmp r2, r3
 			jne desce_linha_loop
-
-	;apagar a linha de que foi descida
-		loadn r7, #'$'
-		loadn r2, #15 ;reset r2	
-		;manter r3
-		load r6, arg_desce_linha ;r6 = posicao inicial da linha antiga
-		apaga_linha_desce_loop:
-			add r4, r0, r2 ;r4 = &cp_mapa[posicao i antiga da linha]
-			storei r4, r7
-			add r5, r6, r2 ;r5 = posicao i antiga da linha
-			outchar r7, r5
-			inc r2
-			cmp r2, r3
-			jne apaga_linha_desce_loop
-
-	pop r7	
+	
+	pop r7
 	pop r6
 	pop r5
 	pop r4
@@ -1757,6 +1613,94 @@ desce_linha:
 	rts
 ;--------------------------------------------------
 ;END desce_linha
+;--------------------------------------------------
+
+;--------------------------------------------------
+;atualiza_quads
+;--------------------------------------------------
+;parametros
+;	index_atualiza_quads : indice do quads que foi eliminado
+atualiza_quads:
+	push FR
+	push r0 ;posicao do quads ou pos
+	push r1 
+	push r2
+	push r3
+	push r4
+	push r5
+	push r6
+	push r7
+
+	loadn r0, #0
+	load r1, index_atualiza_quads
+	cmp r0, r1
+	jne nao_eh_pos_atualiza_quads
+	
+	load r0, pos
+	jmp skip_nao_eh_pos_atualiza_quads
+
+	nao_eh_pos_atualiza_quads:
+		loadn r0, #quads
+		add r0, r0, r1	
+		loadi r0, r0
+
+	skip_nao_eh_pos_atualiza_quads:	
+
+	loadn r1, #quads
+	loadn r2, #4 ;condicao de parada do loop
+	loadn r3, #0 ;contador do loop
+
+	loop_desce_quads:
+		loadi r4, r1 ;r4 = quads[i]
+		
+		;verificar se e' o mesmo quadradinho
+		cmp r4, r0
+		jeq continue_loop_desce_quads 
+	
+		;verificar se esta' na mesma linha
+		loadn r5, #40
+		div r7, r4, r5
+		div r6, r0, r5
+		cmp r7, r6
+		jne nao_esta_na_mesma_linha
+	
+		;caso esteja na mesma linha
+		loadn r5, #0
+		storei r1, r5
+		jmp continue_loop_desce_quads
+
+		nao_esta_na_mesma_linha:
+		;verificar se esta' na linha de cima
+		cmp r7, r6
+		jgr continue_loop_desce_quads ;caso esteja abaixo
+
+		;caso esteja acima
+		loadn r5, #40
+		add r4, r4, r5 ;descer
+		storei r1, r4
+
+		continue_loop_desce_quads:
+		inc r1
+		inc r3
+		cmp r2, r3
+		jne loop_desce_quads	
+
+	;guardar em pos quads[0]
+	load r0, quads
+	store pos, r0	
+
+	pop r7
+	pop r6
+	pop r5
+	pop r4
+	pop r3
+	pop r2
+	pop r1
+	pop r0
+	pop FR
+	rts
+;--------------------------------------------------
+;END atualiza_quads
 ;--------------------------------------------------
 
 ;--------------------------------------------------
@@ -2119,7 +2063,7 @@ calc_quads:
 		loadn r2, #9
 		cmp r7, r2
 		jel if_I
-	
+ 	
 	;verifica_se_quad:
 		loadn r2, #10
 		cmp r7, r2
@@ -2845,7 +2789,8 @@ calc_quads:
 ;parametros:
 ;	arg_se_ocupado : posicao
 ;retorno:
-;	flag_ocupado :
+;	
+flag_ocupado :
 ;		1 : ocupado
 ;		0 : vazio
 se_ocupado:
