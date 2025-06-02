@@ -1374,6 +1374,12 @@ check_line:
 	push r4
 	push r5
 
+	;verificar se o quadradinho ja' foi eliminado
+	loadn r0, #0
+	load r1, pos_check_line
+	cmp r0, r1
+	jeq set_flag_check_line_0
+
 	;obter a posicao inicial da linha
 		load r0, pos_check_line
 		loadn r1, #40
@@ -1400,7 +1406,7 @@ check_line:
 				load r0, flag_ocupado
 				cmp r0, r3
 				jeq set_flag_check_line_0 ;caso haja um quadradinho nao ocupado
-			;aumentar aumentar index e verificar se chegou ao fim do loop
+			;aumentar index e verificar se chegou ao fim do loop
 				inc r4
 				cmp r4, r5
 				jne loop_check_line	
@@ -1408,6 +1414,7 @@ check_line:
 	;caso nao tenha nenhum espaco vazio na linha
 		loadn r0, #1
 		store flag_check_line, r0
+
 
 	end_check_line:
 		pop r5
@@ -1426,7 +1433,8 @@ check_line:
 ;--------------------------------------------------
 ;END check_line
 ;--------------------------------------------------
-
+teste : var #1
+static teste, #0
 ;--------------------------------------------------
 ;eliminar_linha
 ;--------------------------------------------------
@@ -1659,6 +1667,7 @@ atualiza_quads:
 		;caso esteja na mesma linha
 		loadn r5, #0
 		storei r1, r5
+		jmp continue_loop_desce_quads
 
 		nao_esta_na_mesma_linha:
 		;verificar se esta' na linha de cima
