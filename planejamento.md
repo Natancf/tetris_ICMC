@@ -65,6 +65,6 @@ MAIN LOOP
 	- [x] verificar se perdeu
         - [x] resetar mapa
         - [x] tela de game over
-        - [ ] apresentar a pontuação
+        - [x] apresentar a pontuação
         - [x] jogar novamente
 
