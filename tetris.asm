@@ -2797,7 +2797,6 @@ calc_quads:
 ;	arg_se_ocupado : posicao
 ;retorno:
 ;	
-flag_ocupado :
 ;		1 : ocupado
 ;		0 : vazio
 se_ocupado:
