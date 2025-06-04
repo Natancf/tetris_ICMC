@@ -35,12 +35,6 @@ apaga_msg   : string "                                        "
 flag_perdeu : var #1
 static flag_perdeu, #0
 
-;variaveis de down_peca
-c_delay   : var #1
-t_delay   : var #1 
-static t_delay, #60000
-static c_delay, #60000
-
 ;variaveis da funcao se_ocupado 
 arg_se_ocupado : var #1 ;posicao
 flag_ocupado   : var #1
@@ -74,8 +68,12 @@ arg_desce_linha : var #1
 score : var #1
 static score, #0
 
+;parametro de atualiza quads
 index_atualiza_quads : var #1
 
+;verificar se ja rotacionou
+rotacionou : var #1
+static rotacionou, #0
 
 main:
 	;Impressao da mensagem inicial
@@ -100,15 +98,41 @@ main:
 
 	call spawn_peca
 
+	loadn r0, #0 ;contador para as funcoes
+	loadn r1, #0 ;para verificar se mod == 0
+	loadn r4, #'w'
+
 	main_loop:
-		call mv_peca
-		call down_peca
+		loadn r2, #2500
+		mod r2, r0, r2
+		cmp r2, r1
+		ceq mv_peca
+			
+		loadn r2, #10000
+		mod r2, r0, r2
+		cmp r2, r1
+		ceq down_peca
+
 		call se_completa_linha
+
 		call spawn_peca
+
 		jmp se_perdeu
 		rts_se_perdeu:
+		
+		;caso solte o dedo de w
+		inchar r3
+		cmp r3, r4
+		jne reset_rotacionou
+
+		inc r0
 		jmp main_loop
 	halt
+
+reset_rotacionou:
+	loadn r3, #0
+	store rotacionou, r3
+	jmp rts_reset_rotacionou
 
 ;--------------------------------------------------
 ;print_string
@@ -663,9 +687,6 @@ mv_peca:
 		pop r0
 		pop FR	
 		rts
-
-
-
 ;--------------------------------------------------
 ;END mv_peca
 ;--------------------------------------------------
@@ -677,6 +698,8 @@ recalc_pos:
 	push FR
 	push r1 
 	push r2
+	push r3
+	push r4
 
 	;verificar input
 		inchar r1 ;le do teclado
@@ -710,11 +733,22 @@ recalc_pos:
 			jmp exit_verify_input
 
 		recalc_pos_rot: ;se rotaciona
+			;verifica se ja rotacionou
+			load r3, rotacionou
+			loadn r4, #0
+			cmp r3, r4
+			jne exit_verify_input ;caso ja tenha rotacionado
+			
+			;caso nao tenha rotacionado
 			loadn r2, #'w'
 			cmp r1, r2
 			ceq rotate
+			loadn r3, #1
+			store rotacionou, r3
 
-	exit_verify_input:	
+	exit_verify_input:
+		pop r4
+		pop r3	
 		pop r2
 		pop r1
 		pop FR
@@ -1120,16 +1154,6 @@ down_peca:
 	push r6 ;quads
 	push r7 ;pos
 
-	load r0, c_delay
-	loadn r1, #0
-	cmp r0, r1
-	jne decrementa_delay_down_peca	
-
-	;caso c_delay seja 0
-	;reset do delay
-		load r0, t_delay
-		store c_delay, r0
-
 	load r7, pos
 	loadn r6, #quads
 	
@@ -1183,13 +1207,6 @@ down_peca:
 		pop r0
 		pop FR
 		rts
-
-	;sub-rotinas de down_peca
-	decrementa_delay_down_peca:
-		dec r0
-		store c_delay, r0
-		jmp end_down_peca 
-
 ;--------------------------------------------------
 ;END down_peca
 ;--------------------------------------------------
