@@ -4,6 +4,7 @@
 
 Inicialização
 - [x] flag_spawn <- 1 //flag_spawn, caso 1, spawna peca
+- [x] flag_perdeu <- 0
 
 main
 - [x] imprime mensagem inicial 
@@ -16,11 +17,11 @@ main
 	- [x] desenha_mapa
 	- [x] index inicial do vetor randomico <- count
 	- [x] t_peca <- rand[index inicial]
-- [x] spawn peca  (pode dar problema futuramente)
+- [x] spawn peca
 	- [x] verifica flag_spawn //caso 0, skip spawn peca
 	- [x] verificar t_peca
+    - [x] definir posição de spawn
 	- [x] verifica se é possível spawn //caso não seja, GAME OVER (flag_perdeu=1) (não é possível testar ainda)
-	- [x] definir posição de spawn
 	- [x] desenha peca
 		- [x] calc_quads
 	- [x] flag_spawn <- 0
@@ -37,13 +38,14 @@ MAIN LOOP
 					- [x] verificar se é possível mover com base na cópia do mapa
                         - [x] verificar se há colisão à direita
 				- [x] rotaciona (atualiza t_peca)
-				- [ ] mov baixo pelo input *
-				- [ ] descer de uma vez *
+                    -   verifica se é possível rotacionar[x]
+                        - [x] calc_quads
+                        - [x] se_ocupado
 		- [x] verificar se moveu peca
 			- caso sim	
 				- [x] apaga desenho da peca
 				- [x] desenha peca
-	- [x] descer peca (automaticamente)
+	- [x] descer peca
 		- [x] delay para descer
         - [x] se descer
 			- [x] verifica se é possível descer (se está no chão ou se encostou em outra peça) (possivelmente desnecessário verificar se está no chão)
@@ -52,15 +54,17 @@ MAIN LOOP
                             - [x] delay antes de fixar a peca
                             - [x] atualiza cp_mapa
                             - [x] flag_spawn <- 1
-                            - [x] salvar vetor dos quadradinhos da peça colocada (para verificar se fechou linha)
+                            - [x] salvar vetor dos da posição dos quadradinhos da peça colocada (para verificar se fechou linha)
                             - [x] atualiza t_peca
                 - [x] caso seja possivel descer 
                     - [x] atualiza posição
                     - [x] apaga peca
                     - [x] desenha peca
 	- [x] verifica se completa linha
-		- [x] se True move tudo que esta acima para baixo
+        - [x] verifica vetor das posições dos quadradinhos da última peça colocada e verifica as linhas dessas posições
+		- [x] se completou
 			- [x] pontuacao++
+            - [x] move linhas acima para baixo inclusive as posicoes do vetor das posições dos últimos quadradinhos colocados
 	- [x] spawn peca
 	- [x] verificar se perdeu
         - [x] resetar mapa
