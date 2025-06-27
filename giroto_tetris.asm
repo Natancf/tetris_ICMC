@@ -8,10 +8,10 @@ quads : var #4 ;o primeiro elemento do vetor esta inutilizado, mas manter, pois 
 ;calc_quads nao funciona
 
 ;tipo de peca e rotacao atual-----------------------------------------
-t_peca     : var #1
 ant_t_peca : var #1
 var_rot_I  : var #1
 static var_rot_I, #0
+t_peca     : var #1
 ; 0-3 L
 ; 4-7 Linv
 ; 8-9 I
