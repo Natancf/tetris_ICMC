@@ -1143,9 +1143,6 @@ rotate:
 ;--------------------------------------------------
 ;down_peca
 ;--------------------------------------------------
-;parametros
-;	c_delay   : contador para o delay de descer peca
-;	down_flag : para ver se a peca ira' descer ou nao
 down_peca:
 	push FR
 	push r0
