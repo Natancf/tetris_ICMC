@@ -47,6 +47,7 @@ A interação do jogador e a física da peça são os componentes mais complexos
 
 <!-- Obrigatório: incluir um VÍDEO DE VOCË explicando o projeto (pode ser somente uma captura de tela...) - Upa o vídeo no youtube ou no drive e poe o link no Readme. ==> Não coloque o Vídeo no Github/Gitlab-->
 ## Vídeo explicando o programa
+https://www.youtube.com/watch?v=_JL-LY9ZFhY&ab_channel=Gabriel
 
 ## Colaboradores
 
