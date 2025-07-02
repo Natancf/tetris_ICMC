@@ -10,8 +10,9 @@ Este projeto é uma implementação do clássico jogo Tetris em Assembly, criado
 2. Abra o simulador do processador [simulador processador giroto](https://proc.giroto.dev/)
 3. Na aba `Screen editor` import o arquivo `charmap.mif` para o simulador
 4. Na aba `File picker` import o arquivo `giroto_tetris.asm` para o simulador
-5. Com o arquivo aberto Aperte em `Build` para montar o programa
-6. Na aba `State` do simulador aperte em `Run` para executar o jogo
+5. Coloque o processador em 10 MHz.
+6. Com o arquivo aberto Aperte em `Build` para montar o programa
+7. Na aba `State` do simulador aperte em `Run` para executar o jogo
 
 <!--Os projetos devem conter um Readme explicando o projeto e o software deve estar muito bem comentado!!-->
 ## Controles
